@@ -132,7 +132,7 @@ object RollingFileLogger {
         for {
           size <-
             if (maxFileSizeInBytes.isDefined) {
-              F.delay(fileSizeCheck(filePath))
+              F.blocking(fileSizeCheck(filePath))
             } else {
               F.pure(0L)
             }

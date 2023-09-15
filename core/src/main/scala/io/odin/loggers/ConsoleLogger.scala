@@ -27,11 +27,12 @@ case class ConsoleLogger[F[_]](
     formatter: Formatter,
     out: PrintStream,
     err: PrintStream,
-    override val minLevel: Level
+    override val minLevel: Level,
+    syncType: Sync.Type = Sync.Type.Blocking
 )(implicit F: Sync[F])
     extends DefaultLogger[F](minLevel) {
   private def println(out: PrintStream, msg: LoggerMessage, formatter: Formatter): F[Unit] =
-    F.delay(out.println(formatter.format(msg)))
+    F.suspend(syncType)(out.println(formatter.format(msg)))
 
   def submit(msg: LoggerMessage): F[Unit] =
     if (msg.level < Level.Warn) {

@@ -22,6 +22,6 @@ object EnclosureBasedRouting extends IOApp.Simple {
   def bar: IO[Unit] = logger.warn("Warning")
 
   def run: IO[Unit] = {
-    (zoo *> foo *> bar)
+    zoo *> foo *> bar
   }
 }

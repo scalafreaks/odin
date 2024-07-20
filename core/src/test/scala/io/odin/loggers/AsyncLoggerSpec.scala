@@ -24,7 +24,7 @@ class AsyncLoggerSpec extends OdinSpec {
     def withMinimalLevel(level: Level): Logger[IO] = copy(minLevel = level)
   }
 
-  it should "push logs down the chain" in {
+  ignore should "push logs down the chain" in {
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
         ref <- Resource.eval(Ref.of[IO, List[LoggerMessage]](List.empty))

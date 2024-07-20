@@ -16,7 +16,7 @@ object ClassBasedRouting extends IOApp.Simple {
     ).withNoopFallback
 
   def run: IO[Unit] = {
-    (Foo(logger).log *> Bar(logger).log)
+    Foo(logger).log *> Bar(logger).log
   }
 }
 

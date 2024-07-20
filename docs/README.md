@@ -133,7 +133,7 @@ trait Logger[F[_]] {
 Each method returns `F[Unit]`, so most of the time effects are suspended in the context of `F[_]`.
 
 **It's important to keep in memory** that effects like `IO`, `ZIO`, `Task` etc are lazily evaluated, therefore calling
-the logger methods isn't enough to emit the actual log. User has to to combine log operations with the rest of code
+the logger methods isn't enough to emit the actual log. User has to combine log operations with the rest of code
 using plead of options: `for ... yield` comprehension, `flatMap/map` or `>>/*>` operators from cats library.
 
 Particularly interesting are the implicit arguments: `Position`, [`Render[M]`](#render),
@@ -768,7 +768,7 @@ import io.odin.slf4j.OdinLoggerBinder
 class ExternalLogger extends OdinLoggerBinder[IO] {
 
   implicit val F: Sync[IO] = IO.asyncForIO
-  implicit val dispatcher: Dispatcher[IO] = Dispatcher[IO].allocated.unsafeRunSync()._1
+  implicit val dispatcher: Dispatcher[IO] = Dispatcher.sequential[IO].allocated.unsafeRunSync()._1
 
   val loggers: PartialFunction[String, Logger[IO]] = {
     case "some.external.package.SpecificClass" =>

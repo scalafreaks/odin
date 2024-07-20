@@ -22,7 +22,7 @@ lazy val versions = new {
 lazy val onlyScala2 = Option(System.getenv("ONLY_SCALA_2")).contains("true")
 lazy val onlyScala3 = Option(System.getenv("ONLY_SCALA_3")).contains("true")
 lazy val scala3 = if (onlyScala2) List() else List("3.1.0")
-lazy val scala2 = if (onlyScala3) List() else List("2.13.8", "2.12.15")
+lazy val scala2 = if (onlyScala3) List() else List("2.13.8")
 lazy val scalaVersions = scala2 ::: scala3
 
 lazy val scalaTest = "org.scalatest" %% "scalatest" % versions.scalaTest % Test
@@ -76,7 +76,7 @@ lazy val noPublish = Seq(
 
 lazy val sharedSettings = Seq(
   scalaVersion := "2.13.8",
-  organization := "com.github.valskalla",
+  organization := "dev.scalafreaks",
   libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil,
   crossScalaVersions := scalaVersions,
   classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.ScalaLibrary,
@@ -89,20 +89,14 @@ lazy val sharedSettings = Seq(
       "-Werror"
     )
   )),
-  homepage := Some(url("https://github.com/valskalla/odin")),
+  homepage := Some(url("https://github.com/scalafreaks/odin")),
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   developers := List(
     Developer(
-      "sergeykolbasov",
-      "Sergey Kolbasov",
-      "whoisliar@gmail.com",
-      url("https://github.com/sergeykolbasov")
-    ),
-    Developer(
-      "Doikor",
-      "Aki Huttunen",
-      "doikor@gmail.com",
-      url("https://github.com/Doikor")
+      "aartigao",
+      "Alan Artigao",
+      "alanartigao@gmail.com",
+      url("https://github.com/aartigao")
     )
   ),
   libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -261,7 +255,6 @@ lazy val scalac212Options = Seq(
   "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates" // Warn if a private member is unused.
 )
-
 
 lazy val scalac213Options = Seq(
   "-Werror",

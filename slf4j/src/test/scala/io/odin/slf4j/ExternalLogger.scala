@@ -8,7 +8,7 @@ import io.odin.{Level, Logger}
 
 class ExternalLogger extends OdinLoggerBinder[IO] {
   implicit val F: Sync[IO] = IO.asyncForIO
-  implicit val dispatcher: Dispatcher[IO] = Dispatcher[IO].allocated.unsafeRunSync()._1
+  implicit val dispatcher: Dispatcher[IO] = Dispatcher.sequential[IO].allocated.unsafeRunSync()._1
 
   val loggers: PartialFunction[String, Logger[IO]] = {
     case Level.Trace.toString => new BufferingLogger[IO](Level.Trace)

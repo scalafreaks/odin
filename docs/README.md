@@ -67,10 +67,10 @@ Check out [examples](https://github.com/scalafreaks/odin/tree/main/examples) dir
 Effects out of the box
 ---
 
-Some time could be saved by using the effect-predefined variants of Odin. There are options for ZIO and Monix users:
+Some time could be saved by using the effect-predefined variants of Odin. There are options for ZIO 1 and Monix users:
 
 ```scala
-//ZIO
+//ZIO 1
 libraryDependencies += "dev.scalafreaks" %% "odin-zio" % "@VERSION@"
 //or Monix
 libraryDependencies += "dev.scalafreaks" %% "odin-monix" % "@VERSION@"

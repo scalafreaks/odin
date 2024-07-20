@@ -17,7 +17,7 @@ import io.odin.json.{Formatter => JsonFormatter}
 import io.odin.meta.Position
 import org.openjdk.jmh.annotations._
 import org.apache.logging.log4j.LogManager
-import scribe.data.MDC
+import scribe.mdc.MDC
 import scribe.file._
 import scribe.{Logger => ScribeLogger}
 

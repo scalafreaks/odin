@@ -8,7 +8,7 @@ import io.odin.formatter.Formatter
 
 /**
   * This is a half of an example on how to easily test logged messages across the system. The test part is inside of
-  * `https://github.com/valskalla/odin/tree/master/examples/src/test/scala/io/odin/examples/SimpleAppSpec.scala`.
+  * `https://github.com/scalafreaks/odin/tree/main/examples/src/test/scala/io/odin/examples/SimpleAppSpec.scala`.
   *
   * When application runs it prints out greeting along with log of the `simpleService.greet` call.
   */

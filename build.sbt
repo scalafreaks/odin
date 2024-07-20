@@ -76,7 +76,7 @@ lazy val noPublish = Seq(
 
 lazy val sharedSettings = Seq(
   scalaVersion := "2.13.8",
-  organization := "com.github.valskalla",
+  organization := "dev.scalafreaks",
   libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil,
   crossScalaVersions := scalaVersions,
   classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.ScalaLibrary,
@@ -89,20 +89,14 @@ lazy val sharedSettings = Seq(
       "-Werror"
     )
   )),
-  homepage := Some(url("https://github.com/valskalla/odin")),
+  homepage := Some(url("https://github.com/scalafreaks/odin")),
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   developers := List(
     Developer(
-      "sergeykolbasov",
-      "Sergey Kolbasov",
-      "whoisliar@gmail.com",
-      url("https://github.com/sergeykolbasov")
-    ),
-    Developer(
-      "Doikor",
-      "Aki Huttunen",
-      "doikor@gmail.com",
-      url("https://github.com/Doikor")
+      "aartigao",
+      "Alan Artigao",
+      "alanartigao@gmail.com",
+      url("https://github.com/aartigao")
     )
   ),
   libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -261,7 +255,6 @@ lazy val scalac212Options = Seq(
   "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates" // Warn if a private member is unused.
 )
-
 
 lazy val scalac213Options = Seq(
   "-Werror",

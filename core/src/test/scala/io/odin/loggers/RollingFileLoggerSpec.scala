@@ -137,7 +137,7 @@ class RollingFileLoggerSpec extends OdinSpec {
           _ <- Resource.eval(IO.sleep(1200.millis))
           _ <- Resource.eval(logger.log(lm2))
         } yield {
-          val log1 :: log2 :: Nil = ListDirectory(path).filter(_.isFile).sortBy(_.getName)
+          val log1 :: log2 :: Nil = ListDirectory(path).filter(_.isFile).sortBy(_.getName): @unchecked
           new String(Files.readAllBytes(log1.toPath)) shouldBe formatter.format(lm1) + lineSeparator
           new String(Files.readAllBytes(log2.toPath)) shouldBe formatter.format(lm2) + lineSeparator
         }).use(IO(_))
@@ -162,7 +162,7 @@ class RollingFileLoggerSpec extends OdinSpec {
           _ <- Resource.eval(IO.sleep(1.second))
           _ <- Resource.eval(logger.log(lm2))
         } yield {
-          val log1 :: log2 :: _ = ListDirectory(path).filter(_.isFile).sortBy(_.getName)
+          val log1 :: log2 :: _ = ListDirectory(path).filter(_.isFile).sortBy(_.getName): @unchecked
           new String(Files.readAllBytes(log1.toPath)) shouldBe formatter.format(lm1) + lineSeparator
           new String(Files.readAllBytes(log2.toPath)) shouldBe formatter.format(lm2) + lineSeparator
         }).use(IO(_))

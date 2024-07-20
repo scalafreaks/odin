@@ -23,7 +23,7 @@ class SecretLoggerSpec extends OdinSpec {
       whenever(msg.context.nonEmpty) {
         val keys = msg.context.keys.toList
         val logger = new WriterTLogger[Id].withSecretContext(keys.head, keys.tail: _*)
-        val written :: Nil = logger.log(msg).written
+        val written :: Nil = logger.log(msg).written: @unchecked
         checkHashedResult(msg, written)
       }
     }

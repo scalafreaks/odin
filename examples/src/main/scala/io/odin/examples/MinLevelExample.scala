@@ -10,6 +10,6 @@ object MinLevelExample extends IOApp.Simple {
   val logger: Logger[IO] = consoleLogger[IO]().withMinimalLevel(Level.Warn)
 
   def run: IO[Unit] = {
-    (logger.info("Hello?") *> logger.warn("Hi there"))
+    logger.info("Hello?") *> logger.warn("Hi there")
   }
 }

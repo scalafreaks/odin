@@ -23,7 +23,7 @@ class SimpleAppSpec extends OdinSpec {
     val name = "UserName"
 
     // .written is the method of WriterT monad that returns IO[List[LoggerMessage]]
-    val loggedMessage :: Nil = simpleService.greet(name).written.unsafeRunSync()
+    val loggedMessage :: Nil = simpleService.greet(name).written.unsafeRunSync(): @unchecked
 
     // LoggerMessage.message contains the lazy evaluated log from simpleService.greet method
     loggedMessage.message.value shouldBe s"greet is called by user $name"

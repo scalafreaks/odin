@@ -108,6 +108,9 @@ lazy val sharedSettings = Seq(
       "-Werror"
     )
   )),
+  ThisBuild / versionScheme := Some("early-semver"),
+  ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org",
+  sonatypeRepository := "https://s01.oss.sonatype.org/service/local",
   homepage := Some(url("https://github.com/scalafreaks/odin")),
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   developers := List(

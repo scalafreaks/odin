@@ -1,40 +1,40 @@
 lazy val versions = new {
 
-  val scalaTest = "3.2.9"
+  val cats = "2.12.0"
 
-  val scalaTestScalaCheck = "3.2.9.0"
+  val catsEffect = "3.5.4"
 
-  val cats = "2.7.0"
+  val catsMtl = "1.4.0"
 
-  val catsEffect = "3.3.4"
+  val disruptor = "4.0.0"
 
-  val catsMtl = "1.2.1"
+  val jsoniter = "2.30.7"
 
-  val sourcecode = "0.2.7"
-
-  val monix = "3.4.0"
+  val log4j = "2.23.1"
 
   val magnoliaScala2 = "0.17.0"
 
   val magnoliaScala3 = "2.0.0-M4"
 
-  val scalaCheck = "1.15.4"
+  val monix = "3.4.0"
 
-  val zio = "1.0.9"
+  val perfolation = "1.2.11"
 
-  val zioCats = "3.1.1.0"
+  val scalaCheck = "1.18.0"
 
-  val slf4j = "1.7.33"
+  val scalaTest = "3.2.19"
 
-  val log4j = "2.17.0"
+  val scalaTestScalaCheck = "3.2.11.0"
 
-  val disruptor = "3.4.4"
+  val scribe = "3.15.0"
 
-  val scribe = "3.5.5"
+  val slf4j = "1.7.36"
 
-  val perfolation = "1.2.8"
+  val sourcecode = "0.4.2"
 
-  val jsoniter = "2.12.1"
+  val zio = "1.0.18"
+
+  val zioCats = "13.0.0.2"
 
 }
 
@@ -220,7 +220,6 @@ lazy val odin = (project in file("."))
   .aggregate(`odin-core`, `odin-json`, `odin-zio`, /* `odin-monix`,*/ `odin-slf4j`, `odin-extras`, benchmarks, examples)
 
 def scalacOptionsVersion(scalaVersion: String) = CrossVersion.partialVersion(scalaVersion) match {
-  case Some((2, scalaMajor)) if scalaMajor == 12 => scalac2Options ++ scalac212Options
   case Some((2, scalaMajor)) if scalaMajor == 13 => scalac2Options ++ scalac213Options
   case Some((3, _))                              => scalac3Options
 }
@@ -252,27 +251,6 @@ lazy val scalac2Options = Seq(
   "-Xlint:private-shadow", // A private field (or class parameter) shadows a superclass field.
   "-Xlint:stars-align", // Pattern sequence wildcard must align with sequence component.
   "-Xlint:type-parameter-shadow" // A local type parameter shadows a type already in scope.
-)
-
-lazy val scalac212Options = Seq(
-  "-Xfuture", // Turn on future language features.
-  "-Xfatal-warnings", // Fail the compilation if there are any warnings.
-  "-Yno-adapted-args", // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
-  "-Ypartial-unification", // Enable partial unification in type constructor inference
-  "-Xlint:by-name-right-associative", // By-name parameter of right associative operator.
-  "-Xlint:unsound-match", // Pattern match may not be typesafe.
-  "-Ywarn-inaccessible", // Warn about inaccessible types in method signatures.
-  "-Ywarn-infer-any", // Warn when a type argument is inferred to be `Any`.
-  "-Ywarn-nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.
-  "-Ywarn-dead-code", // Warn when dead code is identified.
-  "-Ywarn-extra-implicit", // Warn when more than one implicit parameter section is defined.
-  "-Ywarn-nullary-unit", // Warn when nullary methods return Unit.
-  "-Ywarn-unused:implicits", // Warn if an implicit parameter is unused.
-  "-Ywarn-unused:imports", // Warn if an import selector is not referenced.
-  "-Ywarn-unused:locals", // Warn if a local definition is unused.
-  "-Ywarn-unused:params", // Warn if a value parameter is unused.
-  "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
-  "-Ywarn-unused:privates" // Warn if a private member is unused.
 )
 
 lazy val scalac213Options = Seq(

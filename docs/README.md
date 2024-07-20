@@ -27,7 +27,7 @@ users to decide what they feel comfortable with: `IO`, `ZIO`, `monix.Task`, `Rea
 Setup
 ---
 
-Odin is published to Maven Central and cross-built for Scala 2.12 and 2.13. Add the following lines to your build:
+Odin is published to Maven Central and cross-built for Scala 2.13 and 3. Add the following lines to your build:
 
 ```scala
 libraryDependencies ++= Seq(

@@ -96,15 +96,7 @@ lazy val jsoniter = List(
 
 lazy val sharedSettings = Seq(
   libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil,
-//  classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.ScalaLibrary,
-  libraryDependencies ++= {
-    if (tlIsScala3.value) List.empty
-    else
-      List(
-        compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.full),
-        compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-      )
-  }
+  Test / tlFatalWarnings := false
 )
 
 lazy val `odin-core` = (project in file("core"))

@@ -16,18 +16,17 @@
 
 package io.odin
 
-import _root_.zio._
+import _root_.zio.*
 import _root_.zio.clock.Clock
 import _root_.zio.blocking.Blocking
-import _root_.zio.interop.catz._
-import _root_.zio.interop.catz.implicits._
+import _root_.zio.interop.catz.*
 import cats.arrow.FunctionK
 import cats.effect.std.Dispatcher
 import cats.~>
 import io.odin.formatter.Formatter
 
 import scala.annotation.nowarn
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 package object zio {
 
@@ -44,7 +43,7 @@ package object zio {
   /**
     * See `io.odin.fileLogger`
     */
-  @nowarn("cat=unused")
+  @nowarn
   def fileLogger(
       fileName: String,
       formatter: Formatter = Formatter.default,
@@ -66,7 +65,7 @@ package object zio {
   /**
     * See `io.odin.asyncFileLogger`
     */
-  @nowarn("cat=unused")
+  @nowarn
   def asyncFileLogger(
       fileName: String,
       formatter: Formatter = Formatter.default,

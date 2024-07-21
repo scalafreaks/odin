@@ -36,5 +36,6 @@ object LoggerError {
     case io: java.io.IOException          => IOException(io)
     case sec: java.lang.SecurityException => SecurityException(sec)
     case NonFatal(t)                      => Unknown(t)
+    case fatal                            => throw fatal
   }
 }

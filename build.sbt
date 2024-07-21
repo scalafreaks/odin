@@ -12,9 +12,9 @@ lazy val versions = new {
 
   val log4j = "2.23.1"
 
-  val magnoliaScala2 = "0.17.0"
+  val magnoliaScala2 = "1.1.0"
 
-  val magnoliaScala3 = "2.0.0-M4"
+  val magnoliaScala3 = "1.3.7"
 
   val perfolation = "1.2.11"
 
@@ -61,8 +61,8 @@ lazy val sourcecode = "com.lihaoyi" %% "sourcecode" % versions.sourcecode
 
 lazy val scalaCheck = "org.scalacheck" %% "scalacheck" % versions.scalaCheck % Test
 
-lazy val magnoliaScala2 = "com.propensive" %% "magnolia" % versions.magnoliaScala2
-lazy val magnoliaScala3 = "com.softwaremill.magnolia" %% "magnolia-core" % versions.magnoliaScala3
+lazy val magnoliaScala2 = "com.softwaremill.magnolia1_2" %% "magnolia" % versions.magnoliaScala2
+lazy val magnoliaScala3 = "com.softwaremill.magnolia1_3" %% "magnolia" % versions.magnoliaScala3
 
 lazy val perfolation = "com.outr" %% "perfolation" % versions.perfolation
 

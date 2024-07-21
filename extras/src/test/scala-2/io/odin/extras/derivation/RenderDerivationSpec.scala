@@ -47,6 +47,8 @@ class RenderDerivationSpec extends OdinSpec {
     Render[WithLengthLimit[String, String]].render(instance) shouldBe expected
   }
 
+  private val renderBar: Render[Bar] = implicitly
+
   it should "derive a type class respecting annotations" in forAll { (bar: Bar) =>
     def renderFoo(foo: Foo): String =
       s"Foo(GenericClass(field = ${foo.field.field.value}, secret = <secret>, lengthLimited = ${foo.field.lengthLimited}))"
@@ -62,7 +64,7 @@ class RenderDerivationSpec extends OdinSpec {
 
     val expected = s"Bar(genericClass = $generic)"
 
-    Render[Bar].render(bar) shouldBe expected
+    renderBar.render(bar) shouldBe expected
   }
 
   it should "not recursively generate instances by `instance` method" in {

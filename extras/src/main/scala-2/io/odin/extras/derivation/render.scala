@@ -1,7 +1,7 @@
 package io.odin.extras.derivation
 
 import io.odin.meta.Render
-import magnolia.{CaseClass, Magnolia, Param, SealedTrait}
+import magnolia1._
 import java.security.MessageDigest
 import java.math.BigInteger
 
@@ -9,7 +9,7 @@ object render {
 
   type Typeclass[A] = Render[A]
 
-  def combine[A](ctx: CaseClass[Typeclass, A]): Typeclass[A] = value => {
+  def join[A](ctx: CaseClass[Typeclass, A]): Typeclass[A] = value => {
     if (ctx.isValueClass) {
       ctx.parameters.headOption.fold("")(param => param.typeclass.render(param.dereference(value)))
     } else {
@@ -37,8 +37,8 @@ object render {
     }
   }
 
-  def dispatch[A](ctx: SealedTrait[Typeclass, A]): Typeclass[A] = value => {
-    ctx.dispatch(value)(sub => sub.typeclass.render(sub.cast(value)))
+  def split[A](ctx: SealedTrait[Typeclass, A]): Typeclass[A] = value => {
+    ctx.split(value)(sub => sub.typeclass.render(sub.cast(value)))
   }
 
   /**
@@ -80,10 +80,7 @@ private object RenderUtils {
 
   @inline def includeMemberNames[A](ctx: CaseClass[Render, A]): Boolean =
     ctx.annotations
-      .collectFirst {
-        case rendered(v) =>
-          v
-      }
+      .collectFirst { case rendered(v) => v }
       .getOrElse(true)
 
   @inline def isSecret[A](param: Param[Render, A]): Boolean =
@@ -119,10 +116,7 @@ private object RenderUtils {
 
   object hasLengthLimit {
     def unapply[A](arg: Param[Render, A]): Option[(Param[Render, A], Int)] =
-      arg.annotations.collectFirst {
-        case length(limit) =>
-          (arg, limit)
-      }
+      arg.annotations.collectFirst { case length(limit) => (arg, limit) }
   }
 
 }

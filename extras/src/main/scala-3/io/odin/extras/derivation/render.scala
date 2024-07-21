@@ -1,7 +1,7 @@
 package io.odin.extras.derivation
 
 import io.odin.meta.Render
-import magnolia.*
+import magnolia1.*
 import java.security.MessageDigest
 import java.math.BigInteger
 
@@ -49,15 +49,13 @@ object render extends Derivation[Render] {
 
 private object RenderUtils {
 
-  import magnolia.CaseClass.Param
+  import magnolia1.CaseClass.Param
 
   val SecretPlaceholder = "<secret>"
 
   @inline def includeMemberNames[A](ctx: CaseClass[Render, A]): Boolean =
     ctx.annotations
-      .collectFirst { case rendered(v) =>
-        v
-      }
+      .collectFirst { case rendered(v) => v }
       .getOrElse(true)
 
   @inline def isSecret[A](param: Param[Render, A]): Boolean =
@@ -93,9 +91,7 @@ private object RenderUtils {
 
   object hasLengthLimit {
     def unapply[A](arg: Param[Render, A]): Option[(Param[Render, A], Int)] =
-      arg.annotations.collectFirst { case length(limit) =>
-        (arg, limit)
-      }
+      arg.annotations.collectFirst { case length(limit) => (arg, limit) }
   }
 
 }

@@ -43,7 +43,7 @@ class ContextualLoggerSpec extends OdinSpec {
 
   it should "pick up context from F[_]" in {
     forAll { (loggerMessage: LoggerMessage, ctx: Map[String, String]) =>
-      val List(written) = logger.log(loggerMessage).apply(ctx).written.unsafeRunSync()
+      val List(written) = logger.log(loggerMessage).apply(ctx).written.unsafeRunSync(): @unchecked
       written.context shouldBe loggerMessage.context ++ ctx
     }
   }

@@ -75,8 +75,8 @@ class LoggerNatTransformSpec extends OdinSpec {
   private def logger(implicit clock: Clock[Id]): Logger[F] = new WriterTLogger[Id]
 
   private def check(fnF: => F[Unit], fnFF: => FF[Unit]) = {
-    val List(loggerMessageF) = fnF.written
-    val List(loggerMessageFF) = fnFF.written.unsafeRunSync()
+    val List(loggerMessageF) = fnF.written: @unchecked
+    val List(loggerMessageFF) = fnFF.written.unsafeRunSync(): @unchecked
     loggerMessageEq.eqv(loggerMessageF, loggerMessageFF) shouldBe true
   }
 }

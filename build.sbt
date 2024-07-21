@@ -95,8 +95,7 @@ lazy val jsoniter = List(
 )
 
 lazy val sharedSettings = Seq(
-  libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil,
-  Test / tlFatalWarnings := false
+  libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil
 )
 
 lazy val `odin-core` = (project in file("core"))

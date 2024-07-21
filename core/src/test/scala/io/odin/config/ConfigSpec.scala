@@ -64,8 +64,8 @@ class ConfigSpec extends OdinSpec {
             classOf[TestClass[F]] -> TestLogger(loggerName2)
           ).withNoopFallback
 
-        val List((ln1, _)) = routerLogger.info(msg).written.unsafeRunSync()
-        val List((ln2, _)) = (new TestClass[F](routerLogger)).log(msg).written.unsafeRunSync()
+        val List((ln1, _)) = routerLogger.info(msg).written.unsafeRunSync(): @unchecked
+        val List((ln2, _)) = (new TestClass[F](routerLogger)).log(msg).written.unsafeRunSync(): @unchecked
 
         ln1 shouldBe loggerName1
         ln2 shouldBe loggerName2

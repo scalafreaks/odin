@@ -134,7 +134,7 @@ class DefaultLoggerSpec extends OdinSpec {
       ctx: Map[String, String] = Map.empty,
       throwable: Option[Throwable] = None
   ) = {
-    val List(loggerMessage) = fn.written
+    val List(loggerMessage) = fn.written: @unchecked
     loggerMessage.level shouldBe level
     loggerMessage.message.value shouldBe msg
     loggerMessage.context shouldBe ctx

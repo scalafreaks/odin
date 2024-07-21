@@ -64,6 +64,7 @@ class SecretLoggerSpec extends OdinSpec {
     origin.context.keys should contain theSameElementsAs written.context.keys
     origin.context.values shouldNot contain theSameElementsAs written.context.values
     all(written.context.values) should startWith("secret:")
+    ()
   }
 
 }

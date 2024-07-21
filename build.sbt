@@ -16,8 +16,6 @@ lazy val versions = new {
 
   val magnoliaScala3 = "2.0.0-M4"
 
-  val monix = "3.4.0"
-
   val perfolation = "1.2.11"
 
   val scalaCheck = "1.18.0"
@@ -61,11 +59,7 @@ lazy val catsMtl = "org.typelevel" %% "cats-mtl" % versions.catsMtl
 
 lazy val sourcecode = "com.lihaoyi" %% "sourcecode" % versions.sourcecode
 
-lazy val monixCatnap = "io.monix" %% "monix-catnap" % versions.monix
-
 lazy val scalaCheck = "org.scalacheck" %% "scalacheck" % versions.scalaCheck % Test
-
-lazy val monix = "io.monix" %% "monix" % versions.monix
 
 lazy val magnoliaScala2 = "com.propensive" %% "magnolia" % versions.magnoliaScala2
 lazy val magnoliaScala3 = "com.softwaremill.magnolia" %% "magnolia-core" % versions.magnoliaScala3
@@ -155,13 +149,6 @@ lazy val `odin-zio` = (project in file("zio"))
   )
   .dependsOn(`odin-core` % "compile->compile;test->test")
 
-lazy val `odin-monix` = (project in file("monix"))
-  .settings(sharedSettings)
-  .settings(
-    libraryDependencies += monix
-  )
-  .dependsOn(`odin-core` % "compile->compile;test->test")
-
 lazy val `odin-slf4j` = (project in file("slf4j"))
   .settings(sharedSettings)
   .settings(
@@ -204,7 +191,7 @@ lazy val docs = (project in file("odin-docs"))
     mdocOut := file("."),
     libraryDependencies += catsEffect
   )
-  .dependsOn(`odin-core`, `odin-json`, `odin-zio`, /*`odin-monix`,*/ `odin-slf4j`, `odin-extras`)
+  .dependsOn(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`)
   .enablePlugins(MdocPlugin)
 
 lazy val examples = (project in file("examples"))
@@ -219,8 +206,8 @@ lazy val examples = (project in file("examples"))
 lazy val odin = (project in file("."))
   .settings(sharedSettings)
   .settings(noPublish)
-  .dependsOn(`odin-core`, `odin-json`, `odin-zio`, /* `odin-monix`,*/ `odin-slf4j`, `odin-extras`)
-  .aggregate(`odin-core`, `odin-json`, `odin-zio`, /* `odin-monix`,*/ `odin-slf4j`, `odin-extras`, benchmarks, examples)
+  .dependsOn(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`)
+  .aggregate(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`, benchmarks, examples)
 
 def scalacOptionsVersion(scalaVersion: String) = CrossVersion.partialVersion(scalaVersion) match {
   case Some((2, scalaMajor)) if scalaMajor == 13 => scalac2Options ++ scalac213Options

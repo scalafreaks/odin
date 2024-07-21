@@ -1,17 +1,32 @@
+/*
+ * Copyright 2024 ScalaFreaks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.odin
 
-import _root_.zio._
+import _root_.zio.*
 import _root_.zio.clock.Clock
 import _root_.zio.blocking.Blocking
-import _root_.zio.interop.catz._
-import _root_.zio.interop.catz.implicits._
+import _root_.zio.interop.catz.*
 import cats.arrow.FunctionK
 import cats.effect.std.Dispatcher
 import cats.~>
 import io.odin.formatter.Formatter
 
 import scala.annotation.nowarn
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 package object zio {
 
@@ -28,7 +43,7 @@ package object zio {
   /**
     * See `io.odin.fileLogger`
     */
-  @nowarn("cat=unused")
+  @nowarn
   def fileLogger(
       fileName: String,
       formatter: Formatter = Formatter.default,
@@ -50,7 +65,7 @@ package object zio {
   /**
     * See `io.odin.asyncFileLogger`
     */
-  @nowarn("cat=unused")
+  @nowarn
   def asyncFileLogger(
       fileName: String,
       formatter: Formatter = Formatter.default,

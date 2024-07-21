@@ -1,3 +1,20 @@
+ThisBuild / tlBaseVersion := "0.13"
+
+ThisBuild / organization := "dev.scalafreaks"
+ThisBuild / organizationName := "ScalaFreaks"
+ThisBuild / startYear := Some(2024)
+ThisBuild / licenses := Seq(License.Apache2)
+ThisBuild / developers := List(tlGitHubDev("aartigao", "Alan Artigao"))
+
+ThisBuild / tlFatalWarnings := true
+ThisBuild / tlJdkRelease := Some(11)
+
+val Scala2 = "2.13.14"
+val Scala3 = "3.3.3"
+ThisBuild / scalaVersion := Scala3
+ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
+ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
+
 lazy val versions = new {
 
   val cats = "2.12.0"
@@ -35,12 +52,6 @@ lazy val versions = new {
   val zioCats = "13.0.0.2"
 
 }
-
-lazy val onlyScala2 = Option(System.getenv("ONLY_SCALA_2")).contains("true")
-lazy val onlyScala3 = Option(System.getenv("ONLY_SCALA_3")).contains("true")
-lazy val scala3 = if (onlyScala2) List() else List("3.3.3")
-lazy val scala2 = if (onlyScala3) List() else List("2.13.14")
-lazy val scalaVersions = scala2 ::: scala3
 
 lazy val scalaTest = "org.scalatest" %% "scalatest" % versions.scalaTest % Test
 lazy val scalaTestScalaCheck = "org.scalatestplus" %% "scalacheck-1-15" % versions.scalaTestScalaCheck % Test
@@ -83,46 +94,17 @@ lazy val jsoniter = List(
   "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-macros" % versions.jsoniter % "compile-internal"
 )
 
-lazy val noPublish = Seq(
-  publish / skip := true
-)
-
 lazy val sharedSettings = Seq(
-  scalaVersion := "2.13.14",
-  organization := "dev.scalafreaks",
   libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil,
-  crossScalaVersions := scalaVersions,
-  classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.ScalaLibrary,
-  scalacOptions := scalacOptionsVersion(scalaVersion.value),
-  Compile / console / scalacOptions ~= (_.filterNot(
-    Set(
-      "-Ywarn-unused:imports",
-      "-Xfatal-warnings",
-      "-Wunused:implicits",
-      "-Werror"
-    )
-  )),
-  ThisBuild / versionScheme := Some("early-semver"),
-  ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org",
-  sonatypeRepository := "https://s01.oss.sonatype.org/service/local",
-  homepage := Some(url("https://github.com/scalafreaks/odin")),
-  licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-  developers := List(
-    Developer(
-      "aartigao",
-      "Alan Artigao",
-      "alanartigao@gmail.com",
-      url("https://github.com/aartigao")
-    )
-  ),
-  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, _)) =>
+//  classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.ScalaLibrary,
+  libraryDependencies ++= {
+    if (tlIsScala3.value) List.empty
+    else
       List(
         compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.full),
         compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
       )
-    case _ => Nil
-  })
+  }
 )
 
 lazy val `odin-core` = (project in file("core"))
@@ -159,22 +141,22 @@ lazy val `odin-slf4j` = (project in file("slf4j"))
 lazy val `odin-extras` = (project in file("extras"))
   .settings(sharedSettings)
   .settings(
-    libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => List(magnoliaScala3)
-      case _ =>
+    libraryDependencies ++= {
+      if (tlIsScala3.value) List(magnoliaScala3)
+      else
         List(
           magnoliaScala2,
           // only in provided scope so that users of extras not relying on magnolia don't get it on their classpaths
           // see extras section In Readme
           "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
         )
-    })
+    }
   )
   .dependsOn(`odin-core` % "compile->compile;test->test")
 
 lazy val benchmarks = (project in file("benchmarks"))
+  .enablePlugins(NoPublishPlugin)
   .settings(sharedSettings)
-  .settings(noPublish)
   .enablePlugins(JmhPlugin)
   .settings(
     libraryDependencies ++= catsEffect :: scribe ::: log4j
@@ -182,8 +164,9 @@ lazy val benchmarks = (project in file("benchmarks"))
   .dependsOn(`odin-core`, `odin-json`)
 
 lazy val docs = (project in file("odin-docs"))
+  .enablePlugins(MdocPlugin, NoPublishPlugin)
+  .dependsOn(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`)
   .settings(sharedSettings)
-  .settings(noPublish)
   .settings(
     mdocVariables := Map(
       "VERSION" -> version.value
@@ -191,78 +174,15 @@ lazy val docs = (project in file("odin-docs"))
     mdocOut := file("."),
     libraryDependencies += catsEffect
   )
-  .dependsOn(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`)
-  .enablePlugins(MdocPlugin)
 
 lazy val examples = (project in file("examples"))
+  .enablePlugins(NoPublishPlugin)
+  .dependsOn(`odin-core` % "compile->compile;test->test", `odin-zio`)
   .settings(sharedSettings)
   .settings(
     coverageExcludedPackages := "io.odin.examples.*",
     libraryDependencies += catsEffect
   )
-  .settings(noPublish)
-  .dependsOn(`odin-core` % "compile->compile;test->test", `odin-zio`)
 
-lazy val odin = (project in file("."))
-  .settings(sharedSettings)
-  .settings(noPublish)
-  .dependsOn(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`)
-  .aggregate(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`, benchmarks, examples)
-
-def scalacOptionsVersion(scalaVersion: String) = CrossVersion.partialVersion(scalaVersion) match {
-  case Some((2, scalaMajor)) if scalaMajor == 13 => scalac2Options ++ scalac213Options
-  case Some((3, _))                              => scalac3Options
-}
-
-lazy val scalac2Options = Seq(
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-encoding",
-  "utf-8", // Specify character encoding used by source files.
-  "-explaintypes", // Explain type errors in more detail.
-  "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-  "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
-  "-language:experimental.macros", // Allow macro definition (besides implementation and application)
-  "-language:higherKinds", // Allow higher-kinded types
-  "-language:implicitConversions", // Allow definition of implicit functions called views
-  "-language:postfixOps", // Allow postfix operators
-  "-unchecked", // Enable additional warnings where generated code depends on assumptions.
-  "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
-  "-Xlint:constant", // Evaluation of a constant arithmetic expression results in an error.
-  "-Xlint:delayedinit-select", // Selecting member of DelayedInit.
-  "-Xlint:doc-detached", // A Scaladoc comment appears to be detached from its element.
-  "-Xlint:inaccessible", // Warn about inaccessible types in method signatures.
-  "-Xlint:infer-any", // Warn when a type argument is inferred to be `Any`.
-  "-Xlint:missing-interpolator", // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-unit", // Warn when nullary methods return Unit.
-  "-Xlint:option-implicit", // Option.apply used implicit view.
-  "-Xlint:package-object-classes", // Class or object defined in package object.
-  "-Xlint:poly-implicit-overload", // Parameterized overloaded implicit methods are not visible as view bounds.
-  "-Xlint:private-shadow", // A private field (or class parameter) shadows a superclass field.
-  "-Xlint:stars-align", // Pattern sequence wildcard must align with sequence component.
-  "-Xlint:type-parameter-shadow" // A local type parameter shadows a type already in scope.
-)
-
-lazy val scalac213Options = Seq(
-  "-Werror",
-  "-Wdead-code",
-  "-Wextra-implicit",
-  "-Wunused:implicits",
-  "-Wunused:imports",
-  "-Wunused:patvars",
-  "-Wunused:privates",
-  "-Wunused:params"
-)
-
-lazy val scalac3Options = Seq(
-  "-Ykind-projector",
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-encoding",
-  "utf-8", // Specify character encoding used by source files.
-  "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-  "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
-  "-language:higherKinds", // Allow higher-kinded types
-  "-language:implicitConversions", // Allow definition of implicit functions called views
-  "-language:postfixOps", // Allow postfix operators
-  "-unchecked" // Enable additional warnings where generated code depends on assumptions.
-)
+lazy val odin =
+  tlCrossRootProject.aggregate(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`, benchmarks, examples)

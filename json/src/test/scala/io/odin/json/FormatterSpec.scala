@@ -44,7 +44,7 @@ class FormatterSpec extends OdinSpec {
     jsonString should include(""""message":"just a test"""")
     jsonString should include(""""context":{"a":"field"}""")
     jsonString should include(""""exception":"Caused by: java.lang.Exception: test exception""")
-    jsonString should include(""""position":"io.odin.json.FormatterSpec#jsonString:19"""")
+    jsonString should include(""""position":"io.odin.json.FormatterSpec#jsonString:35"""")
     jsonString should include(""""thread_name":"test-thread-1"""")
     jsonString should include(""""timestamp":"1970-01-01""")
   }

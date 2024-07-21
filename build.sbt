@@ -1,4 +1,4 @@
-ThisBuild / tlBaseVersion := "0.13"
+ThisBuild / tlBaseVersion := "0.14"
 
 ThisBuild / organization := "dev.scalafreaks"
 ThisBuild / organizationName := "ScalaFreaks"
@@ -13,6 +13,7 @@ val Scala2 = "2.13.14"
 val Scala3 = "3.3.3"
 ThisBuild / scalaVersion := Scala3
 ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
+
 ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
 
 lazy val versions = new {
@@ -95,7 +96,9 @@ lazy val jsoniter = List(
 )
 
 lazy val sharedSettings = Seq(
-  libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil
+  libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil,
+  // This to be removed once 0.14.0 is released
+  mimaPreviousArtifacts := mimaPreviousArtifacts.value.map(_.withOrganization("com.github.valskalla"))
 )
 
 lazy val `odin-core` = (project in file("core"))

@@ -22,7 +22,7 @@ top priorities.
 - Interop with SLF4J
 
 Standing on the shoulders of `cats-effect` type classes, Odin abstracts away from concrete effect types, allowing
-users to decide what they feel comfortable with: `IO`, `ZIO`, `monix.Task`, `ReaderT` etc. The choice is yours.
+users to decide what they feel comfortable with: `IO`, `ZIO`, `ReaderT` etc. The choice is yours.
 
 Setup
 ---
@@ -67,21 +67,18 @@ Check out [examples](https://github.com/scalafreaks/odin/tree/main/examples) dir
 Effects out of the box
 ---
 
-Some time could be saved by using the effect-predefined variants of Odin. There are options for ZIO 1 and Monix users:
+Some time could be saved by using the effect-predefined variants of Odin. Currently, there's only option for ZIO 1 
+(Monix support was dropped due to lack of Cats Effect 3 integration):
 
 ```scala
 //ZIO 1
 libraryDependencies += "dev.scalafreaks" %% "odin-zio" % "@VERSION@"
-//or Monix
-libraryDependencies += "dev.scalafreaks" %% "odin-monix" % "@VERSION@"
 ```
 
-Use corresponding import to get an access to the loggers:
+Use corresponding import to get access to the loggers:
 
 ```scala
 import io.odin.zio._
-//or
-import io.odin.monix._
 ```
 
 Documentation
@@ -380,7 +377,7 @@ achieve the best performance.
 ## Async logger
 
 To achieve the best performance with Odin, it's best to use `AsyncLogger` with the combination of any other logger.
-It uses `ConcurrentQueue[F]` from Monix as the buffer that is asynchronously flushed each fixed time period.
+It uses `Queue[F]` from standard Cats Effect as the buffer that is asynchronously flushed each fixed time period.
 
 Conversion of any logger into async one is straightforward:
 

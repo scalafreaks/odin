@@ -189,3 +189,42 @@ jobs:
         with:
           modules-ignore: benchmarks_2.13 benchmarks_3 examples_2.13 examples_3 docs_2.13 docs_3 odinjs_2.13 odinjs_3 odinnative_2.13 odinnative_3 odinjvm_2.13 odinjvm_3
           configs-ignore: test scala-tool scala-doc-tool test-internal
+
+  codecov:
+    name: Codecov Publish
+    if: github.event_name != 'push'
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        scala: [2.13]
+        java: [temurin@11]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout current branch (full)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java (temurin@11)
+        id: setup-java-temurin-11
+        if: matrix.java == 'temurin@11'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: sbt
+
+      - name: sbt update
+        if: matrix.java == 'temurin@11' && steps.setup-java-temurin-11.outputs.cache-hit == 'false'
+        run: sbt +update
+
+      - name: Coverage Aggregate
+        run: sbt '++ ${{ matrix.scala }}' coverage test coverageAggregate
+
+      - name: Publish Aggregated Coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./target/scala-2.13/scoverage-report/scoverage.xml
+          flags: unittests
+          yml: ./.codecov.yml

@@ -16,6 +16,35 @@ ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
 
 ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
 
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
+ThisBuild / githubWorkflowAddedJobs := {
+  val jobSetup = (ThisBuild / githubWorkflowJobSetup).value.toList
+  val coverageAggregate =
+    WorkflowStep.Sbt(
+      List("coverage", "test", "coverageAggregate"),
+      name = Some("Coverage Aggregate")
+    )
+  val codecovPublish =
+    WorkflowStep.Use(
+      name = Some("Publish Aggregated Coverage"),
+      ref = UseRef.Public("codecov", "codecov-action", "v4"),
+      params = Map(
+        "token" -> "${{ secrets.CODECOV_TOKEN }}",
+        "file" -> "./target/scala-2.13/scoverage-report/scoverage.xml",
+        "flags" -> "unittests",
+        "yml" -> "./.codecov.yml"
+      )
+    )
+  val codecovJob =
+    WorkflowJob(
+      "codecov",
+      "Codecov Publish",
+      jobSetup :+ coverageAggregate :+ codecovPublish,
+      cond = Some("github.event_name != 'push'")
+    )
+  (ThisBuild / githubWorkflowAddedJobs).value :+ codecovJob
+}
+
 lazy val versions = new {
 
   val cats = "2.12.0"

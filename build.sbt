@@ -1,3 +1,5 @@
+import xerial.sbt.Sonatype.sonatypeCentralHost
+
 ThisBuild / tlBaseVersion := "0.14"
 
 ThisBuild / organization := "dev.scalafreaks"
@@ -15,6 +17,8 @@ ThisBuild / scalaVersion := Scala3
 ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
 
 ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
+
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 ThisBuild / githubWorkflowAddedJobs := {

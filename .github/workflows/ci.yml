@@ -159,6 +159,7 @@ jobs:
 
   codecov:
     name: Codecov Publish
+    if: github.event_name != 'push'
     strategy:
       matrix:
         os: [ubuntu-latest]

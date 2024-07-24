@@ -157,12 +157,12 @@ jobs:
           SONATYPE_CREDENTIAL_HOST: ${{ secrets.SONATYPE_CREDENTIAL_HOST }}
         run: sbt tlCiRelease
 
-  dependency-submission:
-    name: Submit Dependencies
-    if: github.event_name != 'pull_request'
+  codecov:
+    name: Codecov Publish
     strategy:
       matrix:
         os: [ubuntu-latest]
+        scala: [2.13]
         java: [temurin@11]
     runs-on: ${{ matrix.os }}
     steps:
@@ -184,8 +184,13 @@ jobs:
         if: matrix.java == 'temurin@11' && steps.setup-java-temurin-11.outputs.cache-hit == 'false'
         run: sbt +update
 
-      - name: Submit Dependencies
-        uses: scalacenter/sbt-dependency-submission@v2
+      - name: Coverage Aggregate
+        run: sbt '++ ${{ matrix.scala }}' coverage test coverageAggregate
+
+      - name: Publish Aggregated Coverage
+        uses: codecov/codecov-action@v4
         with:
-          modules-ignore: benchmarks_2.13 benchmarks_3 examples_2.13 examples_3 docs_2.13 docs_3 odinjs_2.13 odinjs_3 odinnative_2.13 odinnative_3 odinjvm_2.13 odinjvm_3
-          configs-ignore: test scala-tool scala-doc-tool test-internal
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./target/scala-2.13/scoverage-report/scoverage.xml
+          flags: unittests
+          yml: ./.codecov.yml

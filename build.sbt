@@ -35,14 +35,14 @@ ThisBuild / githubWorkflowAddedJobs := {
         "yml" -> "./.codecov.yml"
       )
     )
-  Seq(
+  val codecovJob =
     WorkflowJob(
       "codecov",
       "Codecov Publish",
       jobSetup :+ coverageAggregate :+ codecovPublish,
       cond = Some("github.event_name != 'push'")
     )
-  )
+  (ThisBuild / githubWorkflowAddedJobs).value :+ codecovJob
 }
 
 lazy val versions = new {

@@ -11,7 +11,7 @@ ThisBuild / tlJdkRelease := Some(11)
 
 val Scala2 = "2.13.14"
 val Scala3 = "3.3.3"
-ThisBuild / scalaVersion := Scala3
+ThisBuild / scalaVersion := Scala2
 ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
 
 ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
@@ -44,6 +44,21 @@ ThisBuild / githubWorkflowAddedJobs := {
     )
   (ThisBuild / githubWorkflowAddedJobs).value :+ codecovJob
 }
+ThisBuild / githubWorkflowPublishPostamble := Seq(
+  WorkflowStep.Sbt(
+    List("docs / mdoc"),
+    name = Some("Generate repository documentation")
+  ),
+  WorkflowStep.Run(
+    List(
+      "git config user.email 'alanartigao@gmail.com'",
+      "git config user.name 'aartigao'",
+      "git add README.md",
+      "git diff --quiet && git diff --staged --quiet || git commit --cleanup=verbatim -m $'Update documentation\\n\\n\\nskip-checks: true'"
+    ),
+    name = Some("Publish repository documentation")
+  )
+)
 
 lazy val versions = new {
 
@@ -191,9 +206,7 @@ lazy val docs = (project in file("odin-docs"))
   .dependsOn(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`)
   .settings(sharedSettings)
   .settings(
-    mdocVariables := Map(
-      "VERSION" -> version.value
-    ),
+    mdocVariables := Map("VERSION" -> version.value),
     mdocOut := file("."),
     libraryDependencies += catsEffect
   )

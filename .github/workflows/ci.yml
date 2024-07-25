@@ -165,6 +165,16 @@ jobs:
           SONATYPE_CREDENTIAL_HOST: ${{ secrets.SONATYPE_CREDENTIAL_HOST }}
         run: sbt tlCiRelease
 
+      - name: Generate repository documentation
+        run: sbt 'docs / mdoc'
+
+      - name: Publish repository documentation
+        run: |
+          git config user.email 'alanartigao@gmail.com'
+          git config user.name 'aartigao'
+          git add README.md
+          git diff --quiet && git diff --staged --quiet || git commit --cleanup=verbatim -m $'Update documentation\n\n\nskip-checks: true'
+
   dependency-submission:
     name: Submit Dependencies
     if: github.event_name != 'pull_request'

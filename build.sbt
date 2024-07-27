@@ -94,7 +94,7 @@ lazy val versions = new {
 
   val zio = "1.0.18"
 
-  val zioCats = "13.0.0.2"
+  val zioCats = "23.1.0.2"
 
 }
 

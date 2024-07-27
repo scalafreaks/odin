@@ -92,7 +92,7 @@ lazy val versions = new {
 
   val sourcecode = "0.4.2"
 
-  val zio = "1.0.18"
+  val zio = "2.1.6"
 
   val zioCats = "13.0.0.2"
 

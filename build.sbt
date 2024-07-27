@@ -88,7 +88,7 @@ lazy val versions = new {
 
   val scribe = "3.15.0"
 
-  val slf4j = "1.7.36"
+  val slf4j = "2.0.13"
 
   val sourcecode = "0.4.2"
 

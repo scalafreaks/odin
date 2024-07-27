@@ -84,7 +84,7 @@ lazy val versions = new {
 
   val scalaTest = "3.2.19"
 
-  val scalaTestScalaCheck = "3.2.11.0"
+  val scalaTestScalaCheck = "3.2.14.0"
 
   val scribe = "3.15.0"
 
@@ -99,7 +99,7 @@ lazy val versions = new {
 }
 
 lazy val scalaTest = "org.scalatest" %% "scalatest" % versions.scalaTest % Test
-lazy val scalaTestScalaCheck = "org.scalatestplus" %% "scalacheck-1-15" % versions.scalaTestScalaCheck % Test
+lazy val scalaTestScalaCheck = "org.scalatestplus" %% "scalacheck-1-16" % versions.scalaTestScalaCheck % Test
 
 lazy val alleycats = "org.typelevel" %% "alleycats-core" % versions.cats
 

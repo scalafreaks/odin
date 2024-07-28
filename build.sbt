@@ -141,8 +141,6 @@ lazy val jsoniter = List(
 
 lazy val sharedSettings = Seq(
   libraryDependencies ++= scalaTestScalaCheck :: scalaCheck :: scalaTest :: Nil,
-  // This to be removed once 0.14.0 is released
-  mimaPreviousArtifacts := mimaPreviousArtifacts.value.map(_.withOrganization("com.github.valskalla"))
 )
 
 lazy val `odin-core` = (project in file("core"))

@@ -59,6 +59,8 @@ ThisBuild / githubWorkflowPublishPostamble := Seq(
     name = Some("Publish repository documentation")
   )
 )
+ThisBuild / githubWorkflowTargetBranches :=
+  (ThisBuild / githubWorkflowTargetBranches).value.filterNot(_.contains("update/"))
 
 lazy val versions = new {
 

@@ -32,7 +32,7 @@ ThisBuild / githubWorkflowAddedJobs := {
         "token" -> "${{ secrets.CODECOV_TOKEN }}",
         "file" -> "./target/scala-2.13/scoverage-report/scoverage.xml",
         "flags" -> "unittests",
-        "yml" -> "./.codecov.yml"
+        "codecov_yml_path" -> "./.codecov.yml"
       )
     )
   val codecovJob =

@@ -64,7 +64,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
 
   def trace[M, E](msg: => M, e: E)(implicit render: Render[M], tt: ToThrowable[E], position: Position): F[Unit] =
     F.whenA(minLevel <= Level.Trace) {
-      log(Level.Trace, msg, t = Some(tt.throwable(e)))
+      log(Level.Trace, msg, t = Option(tt.throwable(e)))
     }
 
   def trace[M](msg: => M, ctx: Map[String, String])(implicit render: Render[M], position: Position): F[Unit] =
@@ -78,7 +78,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
       position: Position
   ): F[Unit] =
     F.whenA(minLevel <= Level.Trace) {
-      log(Level.Trace, msg, ctx, Some(tt.throwable(e)))
+      log(Level.Trace, msg, ctx, Option(tt.throwable(e)))
     }
 
   def debug[M](msg: => M)(implicit render: Render[M], position: Position): F[Unit] =
@@ -88,7 +88,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
 
   def debug[M, E](msg: => M, e: E)(implicit render: Render[M], tt: ToThrowable[E], position: Position): F[Unit] =
     F.whenA(minLevel <= Level.Debug) {
-      log(Level.Debug, msg, t = Some(tt.throwable(e)))
+      log(Level.Debug, msg, t = Option(tt.throwable(e)))
     }
 
   def debug[M](msg: => M, ctx: Map[String, String])(implicit render: Render[M], position: Position): F[Unit] =
@@ -102,7 +102,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
       position: Position
   ): F[Unit] =
     F.whenA(minLevel <= Level.Debug) {
-      log(Level.Debug, msg, ctx, Some(tt.throwable(e)))
+      log(Level.Debug, msg, ctx, Option(tt.throwable(e)))
     }
 
   def info[M](msg: => M)(implicit render: Render[M], position: Position): F[Unit] =
@@ -112,7 +112,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
 
   def info[M, E](msg: => M, e: E)(implicit render: Render[M], tt: ToThrowable[E], position: Position): F[Unit] =
     F.whenA(minLevel <= Level.Info) {
-      log(Level.Info, msg, t = Some(tt.throwable(e)))
+      log(Level.Info, msg, t = Option(tt.throwable(e)))
     }
 
   def info[M](msg: => M, ctx: Map[String, String])(implicit render: Render[M], position: Position): F[Unit] =
@@ -126,7 +126,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
       position: Position
   ): F[Unit] =
     F.whenA(minLevel <= Level.Info) {
-      log(Level.Info, msg, ctx, Some(tt.throwable(e)))
+      log(Level.Info, msg, ctx, Option(tt.throwable(e)))
     }
 
   def warn[M](msg: => M)(implicit render: Render[M], position: Position): F[Unit] =
@@ -136,7 +136,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
 
   def warn[M, E](msg: => M, e: E)(implicit render: Render[M], tt: ToThrowable[E], position: Position): F[Unit] =
     F.whenA(minLevel <= Level.Warn) {
-      log(Level.Warn, msg, t = Some(tt.throwable(e)))
+      log(Level.Warn, msg, t = Option(tt.throwable(e)))
     }
 
   def warn[M](msg: => M, ctx: Map[String, String])(implicit render: Render[M], position: Position): F[Unit] =
@@ -150,7 +150,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
       position: Position
   ): F[Unit] =
     F.whenA(minLevel <= Level.Warn) {
-      log(Level.Warn, msg, ctx, Some(tt.throwable(e)))
+      log(Level.Warn, msg, ctx, Option(tt.throwable(e)))
     }
 
   def error[M](msg: => M)(implicit render: Render[M], position: Position): F[Unit] =
@@ -160,7 +160,7 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
 
   def error[M, E](msg: => M, e: E)(implicit render: Render[M], tt: ToThrowable[E], position: Position): F[Unit] =
     F.whenA(minLevel <= Level.Error) {
-      log(Level.Error, msg, t = Some(tt.throwable(e)))
+      log(Level.Error, msg, t = Option(tt.throwable(e)))
     }
 
   def error[M](msg: => M, ctx: Map[String, String])(implicit render: Render[M], position: Position): F[Unit] =
@@ -174,6 +174,6 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
       position: Position
   ): F[Unit] =
     F.whenA(minLevel <= Level.Error) {
-      log(Level.Error, msg, ctx, Some(tt.throwable(e)))
+      log(Level.Error, msg, ctx, Option(tt.throwable(e)))
     }
 }

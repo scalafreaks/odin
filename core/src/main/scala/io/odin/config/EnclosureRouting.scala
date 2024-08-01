@@ -16,18 +16,20 @@
 
 package io.odin.config
 
-import alleycats.std.iterable._
-import cats.Monad
-import cats.effect.kernel.Clock
-import cats.syntax.all._
-import io.odin.loggers.DefaultLogger
-import io.odin.{Level, Logger, LoggerMessage}
-
 import scala.annotation.tailrec
+
+import io.odin.{Level, Logger, LoggerMessage}
+import io.odin.loggers.DefaultLogger
+
+import alleycats.std.iterable.*
+import cats.effect.kernel.Clock
+import cats.syntax.all.*
+import cats.Monad
 
 private[config] class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router: List[(String, Logger[F])])(
     implicit F: Monad[F]
 ) extends DefaultLogger(Level.Trace) {
+
   private val indexedRouter = router.mapWithIndex {
     case ((packageName, logger), idx) =>
       (packageName, (idx, logger))
@@ -72,4 +74,5 @@ private[config] class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router:
           route -> logger.withMinimalLevel(level)
       }
     )
+
 }

@@ -18,10 +18,11 @@ package io.odin.loggers
 
 import java.io.PrintStream
 
-import cats.effect.kernel.Sync
-import cats.syntax.all._
-import io.odin.formatter.Formatter
 import io.odin.{Level, Logger, LoggerMessage}
+import io.odin.formatter.Formatter
+
+import cats.effect.kernel.Sync
+import cats.syntax.all.*
 
 case class ConsoleLogger[F[_]](
     formatter: Formatter,
@@ -31,6 +32,7 @@ case class ConsoleLogger[F[_]](
     syncType: Sync.Type
 )(implicit F: Sync[F])
     extends DefaultLogger[F](minLevel) {
+
   private def println(out: PrintStream, msg: LoggerMessage, formatter: Formatter): F[Unit] =
     F.suspend(syncType)(out.println(formatter.format(msg)))
 
@@ -42,9 +44,12 @@ case class ConsoleLogger[F[_]](
     }
 
   def withMinimalLevel(level: Level): Logger[F] = copy(minLevel = level)
+
 }
 
 object ConsoleLogger {
+
   def apply[F[_]: Sync](formatter: Formatter, minLevel: Level, syncType: Sync.Type = Sync.Type.Blocking): Logger[F] =
     ConsoleLogger(formatter, scala.Console.out, scala.Console.err, minLevel, syncType)
+
 }

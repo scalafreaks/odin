@@ -17,25 +17,26 @@
 package io.odin
 
 import java.nio.file.{Files, Paths}
-import java.util.UUID
 import java.util.concurrent.TimeUnit
+import java.util.UUID
 
-import cats.Eval
-import cats.effect.IO
-import cats.effect.unsafe.IORuntime
-import cats.syntax.all._
-import io.odin
-import io.odin.loggers.DefaultLogger
-import io.odin.syntax._
-import io.odin.formatter.Formatter
 import io.odin.formatter.options.{PositionFormat, ThrowableFormat}
-import io.odin.json.{Formatter => JsonFormatter}
+import io.odin.formatter.Formatter
+import io.odin.json.Formatter as JsonFormatter
+import io.odin.loggers.DefaultLogger
 import io.odin.meta.Position
-import org.openjdk.jmh.annotations._
+import io.odin.syntax.*
+
+import cats.effect.unsafe.IORuntime
+import cats.effect.IO
+import cats.syntax.all.*
+import cats.Eval
+import io.odin
 import org.apache.logging.log4j.LogManager
+import org.openjdk.jmh.annotations.*
+import scribe.file.*
 import scribe.mdc.MDC
-import scribe.file._
-import scribe.{Logger => ScribeLogger}
+import scribe.Logger as ScribeLogger
 
 // $COVERAGE-OFF$
 @BenchmarkMode(Array(Mode.AverageTime))
@@ -44,11 +45,13 @@ import scribe.{Logger => ScribeLogger}
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(warmups = 2, jvmArgsAppend = Array("-XX:MaxInlineLevel=18", "-XX:MaxInlineSize=270", "-XX:MaxTrivialSize=12"))
 abstract class OdinBenchmarks {
-  val message: String = "msg"
-  val contextKey: String = "hello"
-  val contextValue: String = "world"
+
+  val message: String              = "msg"
+  val contextKey: String           = "hello"
+  val contextValue: String         = "world"
   val context: Map[String, String] = Map(contextKey -> contextValue)
-  val throwable = new Error()
+  val throwable                    = new Error()
+
   val loggerMessage: LoggerMessage = LoggerMessage(
     io.odin.Level.Debug,
     Eval.later(message),
@@ -63,11 +66,14 @@ abstract class OdinBenchmarks {
     "just-a-test-thread",
     1574716305L
   )
+
   implicit val ioRuntime: IORuntime = IORuntime.global
+
 }
 
 @State(Scope.Benchmark)
 class DefaultLoggerBenchmarks extends OdinBenchmarks {
+
   val noop: Logger[IO] = Logger.noop
 
   val defaultLogger: Logger[IO] = new DefaultLogger[IO](io.odin.Level.Trace) {
@@ -87,11 +93,14 @@ class DefaultLoggerBenchmarks extends OdinBenchmarks {
 
   @Benchmark
   def msgCtxThrowable(): Unit = defaultLogger.info(message, context, throwable).unsafeRunSync()
+
 }
 
 @State(Scope.Benchmark)
 class FileLoggerBenchmarks extends OdinBenchmarks {
+
   val fileName: String = Files.createTempFile(UUID.randomUUID().toString, "").toAbsolutePath.toString
+
   val (logger: Logger[IO], cancelToken: IO[Unit]) =
     fileLogger[IO](fileName).allocated.unsafeRunSync()
 
@@ -115,14 +124,15 @@ class FileLoggerBenchmarks extends OdinBenchmarks {
     cancelToken.unsafeRunSync()
     Files.delete(Paths.get(fileName))
   }
+
 }
 
 @State(Scope.Benchmark)
 class Log4jBenchmark extends OdinBenchmarks {
 
-  private val logger = LogManager.getLogger("log4j")
+  private val logger        = LogManager.getLogger("log4j")
   private val tracingLogger = LogManager.getLogger("log4j-trace")
-  private val asyncLogger = LogManager.getLogger("log4j-async")
+  private val asyncLogger   = LogManager.getLogger("log4j-async")
 
   @Benchmark
   @OperationsPerInvocation(1000)
@@ -145,11 +155,13 @@ class Log4jBenchmark extends OdinBenchmarks {
     Files.delete(Paths.get("log4j-trace.log"))
     Files.delete(Paths.get("log4j-async.log"))
   }
+
 }
 
 @State(Scope.Benchmark)
 class ScribeBenchmark extends OdinBenchmarks {
-  private val writer = FileWriter("scribe.log")
+
+  private val writer      = FileWriter("scribe.log")
   private val asyncWriter = FileWriter("scribe-async.log")
 
   private val logger =
@@ -188,11 +200,14 @@ class ScribeBenchmark extends OdinBenchmarks {
     writer.dispose()
     asyncWriter.dispose()
   }
+
 }
 
 @State(Scope.Benchmark)
 class AsyncLoggerBenchmark extends OdinBenchmarks {
+
   val fileName: String = Files.createTempFile(UUID.randomUUID().toString, "").toAbsolutePath.toString
+
   val (asyncLogger: Logger[IO], cancelToken: IO[Unit]) =
     fileLogger[IO](fileName).withAsync(maxBufferSize = Some(1000000)).allocated.unsafeRunSync()
 
@@ -215,11 +230,13 @@ class AsyncLoggerBenchmark extends OdinBenchmarks {
     cancelToken.unsafeRunSync()
     Files.delete(Paths.get(fileName))
   }
+
 }
 
 @State(Scope.Benchmark)
 class FormatterBenchmarks extends OdinBenchmarks {
-  private val noCtx: LoggerMessage = loggerMessage.copy(context = Map.empty)
+
+  private val noCtx: LoggerMessage       = loggerMessage.copy(context = Map.empty)
   private val noThrowable: LoggerMessage = noCtx.copy(exception = None)
 
   private val formatterDepth = Formatter.create(
@@ -285,7 +302,10 @@ class FormatterBenchmarks extends OdinBenchmarks {
 
 @State(Scope.Benchmark)
 class PositionBenchmark extends OdinBenchmarks {
+
   @Benchmark
   def resolve(): String = implicitly[Position].enclosureName
+
 }
+
 // $COVERAGE-ON$

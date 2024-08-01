@@ -16,10 +16,11 @@
 
 package io.odin.extras.derivation
 
-import io.odin.OdinSpec
-import io.odin.extras.derivation.RenderDerivationSpec._
-import io.odin.extras.derivation.render._
+import io.odin.extras.derivation.render.*
+import io.odin.extras.derivation.RenderDerivationSpec.*
 import io.odin.meta.Render
+import io.odin.OdinSpec
+
 import org.scalacheck.{Arbitrary, Gen}
 
 class RenderDerivationSpec extends OdinSpec {
@@ -67,8 +68,8 @@ class RenderDerivationSpec extends OdinSpec {
     def renderFoo(foo: Foo): String =
       s"Foo(GenericClass(field = ${foo.field.field.value}, secret = <secret>, lengthLimited = ${foo.field.lengthLimited}))"
 
-    val diff = bar.genericClass.lengthLimited.length - LengthLimit
-    val suffix = if (diff > 0) s"($diff more)" else ""
+    val diff   = bar.genericClass.lengthLimited.length - LengthLimit
+    val suffix = if diff > 0 then s"($diff more)" else ""
 
     val lengthLimited =
       Render.renderList[String].render(bar.genericClass.lengthLimited.map(renderFoo).take(LengthLimit))
@@ -88,17 +89,17 @@ class RenderDerivationSpec extends OdinSpec {
 
   val fooGen: Gen[Foo] =
     for {
-      field <- valueClassGen
-      hidden <- Gen.negNum[Long]
-      secret <- nonEmptyStringGen
+      field         <- valueClassGen
+      hidden        <- Gen.negNum[Long]
+      secret        <- nonEmptyStringGen
       lengthLimited <- nonEmptyStringGen
     } yield Foo(GenericClass(field, hidden, secret, lengthLimited))
 
   val barGen: Gen[Bar] =
     for {
-      field <- nonEmptyStringGen
-      hidden <- valueClassGen
-      secret <- Gen.listOf(nonEmptyStringGen)
+      field         <- nonEmptyStringGen
+      hidden        <- valueClassGen
+      secret        <- Gen.listOf(nonEmptyStringGen)
       lengthLimited <- Gen.listOf(fooGen)
     } yield Bar(GenericClass(field, hidden, secret, lengthLimited))
 

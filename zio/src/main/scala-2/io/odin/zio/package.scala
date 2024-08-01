@@ -16,18 +16,19 @@
 
 package io.odin
 
-import _root_.zio._
-import _root_.zio.clock.Clock
-import _root_.zio.blocking.Blocking
-import _root_.zio.interop.catz._
-import _root_.zio.interop.catz.implicits._
-import cats.arrow.FunctionK
-import cats.effect.std.Dispatcher
-import cats.~>
+import scala.annotation.nowarn
+import scala.concurrent.duration.*
+
 import io.odin.formatter.Formatter
 
-import scala.annotation.nowarn
-import scala.concurrent.duration._
+import _root_.zio.*
+import _root_.zio.blocking.Blocking
+import _root_.zio.clock.Clock
+import _root_.zio.interop.catz.*
+import _root_.zio.interop.catz.implicits.*
+import cats.~>
+import cats.arrow.FunctionK
+import cats.effect.std.Dispatcher
 
 package object zio {
 
@@ -91,4 +92,5 @@ package object zio {
     def apply[A](fa: Task[A]): IO[LoggerError, A] =
       fa.mapError(error => LoggerError(error))
   }
+
 }

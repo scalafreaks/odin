@@ -16,10 +16,11 @@
 
 package io.odin.json
 
-import cats.syntax.show._
-import com.github.plokhotnyuk.jsoniter_scala.core._
-import com.github.plokhotnyuk.jsoniter_scala.macros._
 import io.odin.Level
+
+import cats.syntax.show.*
+import com.github.plokhotnyuk.jsoniter_scala.core.*
+import com.github.plokhotnyuk.jsoniter_scala.macros.*
 
 final private[json] case class Output(
     level: Level,
@@ -32,6 +33,7 @@ final private[json] case class Output(
 )
 
 object Output {
+
   implicit private[json] val levelCodec: JsonValueCodec[Level] = new JsonValueCodec[Level] {
 
     // we never decode these
@@ -46,4 +48,5 @@ object Output {
   implicit private[json] val codec: JsonValueCodec[Output] = JsonCodecMaker.make(
     CodecMakerConfig.withFieldNameMapper(JsonCodecMaker.enforce_snake_case)
   )
+
 }

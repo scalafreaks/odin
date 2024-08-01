@@ -16,14 +16,15 @@
 
 package io.odin.loggers
 
+import scala.concurrent.duration.*
+
+import io.odin.{Level, Logger, LoggerMessage, OdinSpec}
+import io.odin.syntax.*
+
+import cats.effect.{IO, Ref, Resource}
 import cats.effect.std.Queue
 import cats.effect.unsafe.IORuntime
-import cats.effect.{IO, Ref, Resource}
-import cats.syntax.all._
-import io.odin.syntax._
-import io.odin.{Level, Logger, LoggerMessage, OdinSpec}
-
-import scala.concurrent.duration._
+import cats.syntax.all.*
 
 class AsyncLoggerSpec extends OdinSpec {
 
@@ -31,6 +32,7 @@ class AsyncLoggerSpec extends OdinSpec {
 
   case class RefLogger(ref: Ref[IO, List[LoggerMessage]], override val minLevel: Level = Level.Trace)
       extends DefaultLogger[IO](minLevel) {
+
     def submit(msg: LoggerMessage): IO[Unit] = IO.raiseError(new IllegalStateException("Async should always batch"))
 
     override def submit(msgs: List[LoggerMessage]): IO[Unit] = {
@@ -38,15 +40,16 @@ class AsyncLoggerSpec extends OdinSpec {
     }
 
     def withMinimalLevel(level: Level): Logger[IO] = copy(minLevel = level)
+
   }
 
   ignore should "push logs down the chain" in {
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
-        ref <- Resource.eval(Ref.of[IO, List[LoggerMessage]](List.empty))
-        logger <- RefLogger(ref).withMinimalLevel(Level.Trace).withAsync()
-        _ <- Resource.eval(msgs.traverse(logger.log))
-        _ <- Resource.eval(IO.sleep(10.millis))
+        ref      <- Resource.eval(Ref.of[IO, List[LoggerMessage]](List.empty))
+        logger   <- RefLogger(ref).withMinimalLevel(Level.Trace).withAsync()
+        _        <- Resource.eval(msgs.traverse(logger.log))
+        _        <- Resource.eval(IO.sleep(10.millis))
         reported <- Resource.eval(ref.get)
       } yield {
         reported shouldBe msgs
@@ -57,9 +60,9 @@ class AsyncLoggerSpec extends OdinSpec {
   it should "push logs to the queue" in {
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
-        queue <- Queue.unbounded[IO, LoggerMessage]
-        logger = AsyncLogger(queue, 1.millis, Logger.noop[IO]).withMinimalLevel(Level.Trace)
-        _ <- msgs.traverse(logger.log)
+        queue    <- Queue.unbounded[IO, LoggerMessage]
+        logger    = AsyncLogger(queue, 1.millis, Logger.noop[IO]).withMinimalLevel(Level.Trace)
+        _        <- msgs.traverse(logger.log)
         reported <- List.fill(msgs.length)(queue.take).sequence
       } yield {
         reported shouldBe msgs
@@ -75,13 +78,14 @@ class AsyncLoggerSpec extends OdinSpec {
     }
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
-        queue <- Queue.unbounded[IO, LoggerMessage]
-        logger = AsyncLogger(queue, 1.millis, errorLogger)
-        _ <- logger.log(msgs)
+        queue  <- Queue.unbounded[IO, LoggerMessage]
+        logger  = AsyncLogger(queue, 1.millis, errorLogger)
+        _      <- logger.log(msgs)
         result <- logger.drain
       } yield {
         result shouldBe (())
       }).unsafeRunSync()
     }
   }
+
 }

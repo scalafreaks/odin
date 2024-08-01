@@ -16,12 +16,13 @@
 
 package io.odin.examples
 
-import cats.data.ReaderT
-import cats.effect.{IO, IOApp}
-import io.odin._
+import io.odin.*
 import io.odin.formatter.Formatter
 import io.odin.loggers.HasContext
-import io.odin.syntax._
+import io.odin.syntax.*
+
+import cats.data.ReaderT
+import cats.effect.{IO, IOApp}
 
 /**
   * Prints `Hello World` log line with some context picked up from the environment of `F[_]`
@@ -50,4 +51,5 @@ object WithContextual extends IOApp.Simple {
 
   def run: IO[Unit] =
     logger.info("Hello world").run(Map("this is" -> "context"))
+
 }

@@ -1,22 +1,23 @@
 ThisBuild / tlBaseVersion := "0.15"
 
-ThisBuild / organization := "dev.scalafreaks"
+ThisBuild / organization     := "dev.scalafreaks"
 ThisBuild / organizationName := "ScalaFreaks"
-ThisBuild / startYear := Some(2024)
-ThisBuild / licenses := Seq(License.Apache2)
-ThisBuild / developers := List(tlGitHubDev("aartigao", "Alan Artigao"))
+ThisBuild / startYear        := Some(2024)
+ThisBuild / licenses         := Seq(License.Apache2)
+ThisBuild / developers       := List(tlGitHubDev("aartigao", "Alan Artigao"))
 
 ThisBuild / tlFatalWarnings := true
-ThisBuild / tlJdkRelease := Some(11)
+ThisBuild / tlJdkRelease    := Some(11)
 
 val Scala2 = "2.13.14"
 val Scala3 = "3.3.3"
-ThisBuild / scalaVersion := Scala2
+ThisBuild / scalaVersion       := Scala2
 ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
 
 ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
+
 ThisBuild / githubWorkflowAddedJobs := {
   val jobSetup = (ThisBuild / githubWorkflowJobSetup).value.toList
   val coverageAggregate =
@@ -29,9 +30,9 @@ ThisBuild / githubWorkflowAddedJobs := {
       name = Some("Publish Aggregated Coverage"),
       ref = UseRef.Public("codecov", "codecov-action", "v4"),
       params = Map(
-        "token" -> "${{ secrets.CODECOV_TOKEN }}",
-        "file" -> "./target/scala-2.13/scoverage-report/scoverage.xml",
-        "flags" -> "unittests",
+        "token"            -> "${{ secrets.CODECOV_TOKEN }}",
+        "file"             -> "./target/scala-2.13/scoverage-report/scoverage.xml",
+        "flags"            -> "unittests",
         "codecov_yml_path" -> "./.codecov.yml"
       )
     )
@@ -44,6 +45,7 @@ ThisBuild / githubWorkflowAddedJobs := {
     )
   (ThisBuild / githubWorkflowAddedJobs).value :+ codecovJob
 }
+
 ThisBuild / githubWorkflowPublishPostamble := Seq(
   WorkflowStep.Sbt(
     List("docs / mdoc"),
@@ -59,6 +61,7 @@ ThisBuild / githubWorkflowPublishPostamble := Seq(
     name = Some("Publish repository documentation")
   )
 )
+
 ThisBuild / githubWorkflowTargetBranches :=
   (ThisBuild / githubWorkflowTargetBranches).value.filterNot(_.contains("update/"))
 
@@ -100,7 +103,7 @@ lazy val versions = new {
 
 }
 
-lazy val scalaTest = "org.scalatest" %% "scalatest" % versions.scalaTest % Test
+lazy val scalaTest           = "org.scalatest"     %% "scalatest"       % versions.scalaTest           % Test
 lazy val scalaTestScalaCheck = "org.scalatestplus" %% "scalacheck-1-16" % versions.scalaTestScalaCheck % Test
 
 lazy val alleycats = "org.typelevel" %% "alleycats-core" % versions.cats
@@ -110,7 +113,7 @@ lazy val cats = List(
   (version: String) => "org.typelevel" %% "cats-laws" % version % Test
 ).map(_.apply(versions.cats))
 
-lazy val catsEffect = "org.typelevel" %% "cats-effect" % versions.catsEffect
+lazy val catsEffect    = "org.typelevel" %% "cats-effect"     % versions.catsEffect
 lazy val catsEffectStd = "org.typelevel" %% "cats-effect-std" % versions.catsEffect
 
 lazy val catsMtl = "org.typelevel" %% "cats-mtl" % versions.catsMtl
@@ -132,12 +135,12 @@ lazy val log4j = ("com.lmax" % "disruptor" % versions.disruptor) :: List(
 ).map(_ % versions.log4j)
 
 lazy val scribe = List(
-  "com.outr" %% "scribe" % versions.scribe,
+  "com.outr" %% "scribe"      % versions.scribe,
   "com.outr" %% "scribe-file" % versions.scribe
 )
 
 lazy val jsoniter = List(
-  "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-core" % versions.jsoniter,
+  "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-core"   % versions.jsoniter,
   "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-macros" % versions.jsoniter % "compile-internal"
 )
 
@@ -163,7 +166,7 @@ lazy val `odin-zio` = (project in file("zio"))
   .settings(
     libraryDependencies ++= Seq(
       catsEffect,
-      "dev.zio" %% "zio" % versions.zio,
+      "dev.zio" %% "zio"              % versions.zio,
       "dev.zio" %% "zio-interop-cats" % versions.zioCats
     )
   )
@@ -206,8 +209,8 @@ lazy val docs = (project in file("odin-docs"))
   .dependsOn(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`)
   .settings(sharedSettings)
   .settings(
-    mdocVariables := Map("VERSION" -> version.value),
-    mdocOut := file("."),
+    mdocVariables       := Map("VERSION" -> version.value),
+    mdocOut             := file("."),
     libraryDependencies += catsEffect
   )
 
@@ -217,7 +220,7 @@ lazy val examples = (project in file("examples"))
   .settings(sharedSettings)
   .settings(
     coverageExcludedPackages := "io.odin.examples.*",
-    libraryDependencies += catsEffect
+    libraryDependencies      += catsEffect
   )
 
 lazy val odin =

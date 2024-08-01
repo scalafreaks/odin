@@ -18,14 +18,14 @@ package io.odin.loggers
 
 import java.nio.file.{Files, Path, Paths}
 import java.util.UUID
+import scala.concurrent.duration.*
+
+import io.odin.*
+import io.odin.{LoggerMessage, OdinSpec}
+import io.odin.formatter.Formatter
 
 import cats.effect.{IO, Resource}
 import cats.effect.unsafe.IORuntime
-import io.odin._
-import io.odin.formatter.Formatter
-import io.odin.{LoggerMessage, OdinSpec}
-
-import scala.concurrent.duration._
 
 class FileLoggerSpec extends OdinSpec {
 
@@ -40,10 +40,10 @@ class FileLoggerSpec extends OdinSpec {
   it should "write formatted message into file" in {
     forAll { (loggerMessage: LoggerMessage, formatter: Formatter) =>
       (for {
-        path <- fileResource
+        path    <- fileResource
         fileName = path.toString
-        logger <- FileLogger[IO](fileName, formatter, Level.Trace, Nil)
-        _ <- Resource.eval(logger.log(loggerMessage))
+        logger  <- FileLogger[IO](fileName, formatter, Level.Trace, Nil)
+        _       <- Resource.eval(logger.log(loggerMessage))
       } yield {
         new String(Files.readAllBytes(Paths.get(fileName))) shouldBe formatter.format(loggerMessage) + lineSeparator
       }).use(IO(_))
@@ -54,10 +54,10 @@ class FileLoggerSpec extends OdinSpec {
   it should "write formatted messages into file" in {
     forAll { (loggerMessage: List[LoggerMessage], formatter: Formatter) =>
       (for {
-        path <- fileResource
+        path    <- fileResource
         fileName = path.toString
-        logger <- FileLogger[IO](fileName, formatter, Level.Trace, Nil)
-        _ <- Resource.eval(logger.log(loggerMessage))
+        logger  <- FileLogger[IO](fileName, formatter, Level.Trace, Nil)
+        _       <- Resource.eval(logger.log(loggerMessage))
       } yield {
         new String(Files.readAllBytes(Paths.get(fileName))) shouldBe loggerMessage
           .map(formatter.format)
@@ -70,11 +70,11 @@ class FileLoggerSpec extends OdinSpec {
   it should "write in async mode" in {
     forAll { (loggerMessage: List[LoggerMessage], formatter: Formatter) =>
       (for {
-        path <- fileResource
+        path    <- fileResource
         fileName = path.toString
-        logger <- asyncFileLogger[IO](fileName, formatter)
-        _ <- Resource.eval(logger.withMinimalLevel(Level.Trace).log(loggerMessage))
-        _ <- Resource.eval(IO.sleep(2.seconds))
+        logger  <- asyncFileLogger[IO](fileName, formatter)
+        _       <- Resource.eval(logger.withMinimalLevel(Level.Trace).log(loggerMessage))
+        _       <- Resource.eval(IO.sleep(2.seconds))
       } yield {
         new String(Files.readAllBytes(Paths.get(fileName))) shouldBe loggerMessage
           .map(formatter.format)
@@ -83,4 +83,5 @@ class FileLoggerSpec extends OdinSpec {
         .unsafeRunSync()
     }
   }
+
 }

@@ -18,8 +18,8 @@ package io.odin.loggers
 
 import java.security.MessageDigest
 
-import io.odin.LoggerMessage
 import io.odin.util.Hex
+import io.odin.LoggerMessage
 
 object SecretLogger {
 

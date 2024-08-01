@@ -16,11 +16,12 @@
 
 package io.odin.examples
 
-import cats.Applicative
-import cats.effect.{IO, IOApp}
-import cats.syntax.all._
-import io.odin._
+import io.odin.*
 import io.odin.formatter.Formatter
+
+import cats.effect.{IO, IOApp}
+import cats.syntax.all.*
+import cats.Applicative
 
 /**
   * This is a half of an example on how to easily test logged messages across the system. The test part is inside of
@@ -39,6 +40,7 @@ object SimpleApp extends IOApp.Simple {
   def run: IO[Unit] = {
     greetUser("Viking").map(println(_))
   }
+
 }
 
 /**
@@ -62,7 +64,9 @@ trait SimpleService[F[_]] {
   * `Applicative[F]` for the sake of combining logging with the rest of the code
   */
 class HelloSimpleService[F[_]](logger: Logger[F])(implicit F: Applicative[F]) extends SimpleService[F] {
+
   def greet(name: String): F[String] = {
     logger.debug(s"greet is called by user $name") *> F.pure(s"Hello $name")
   }
+
 }

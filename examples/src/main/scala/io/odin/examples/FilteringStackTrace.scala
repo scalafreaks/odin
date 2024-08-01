@@ -16,10 +16,11 @@
 
 package io.odin.examples
 
-import cats.effect.{IO, IOApp}
-import io.odin._
-import io.odin.formatter.Formatter
+import io.odin.*
 import io.odin.formatter.options.ThrowableFormat
+import io.odin.formatter.Formatter
+
+import cats.effect.{IO, IOApp}
 
 /**
   * Filters stack trace of the thrown exception.
@@ -47,13 +48,15 @@ import io.odin.formatter.options.ThrowableFormat
   * }}}
   */
 object FilteringStackTrace extends IOApp.Simple {
+
   val throwableFormat: ThrowableFormat = ThrowableFormat(
     ThrowableFormat.Depth.Fixed(3),
     ThrowableFormat.Indent.NoIndent,
     ThrowableFormat.Filter.Excluding("cats.effect.IOApp", "cats.effect.internals.IOAppPlatform")
   )
+
   val logger: Logger[IO] = consoleLogger(formatter = Formatter.create(throwableFormat, colorful = true))
 
-  def run: IO[Unit] =
-    logger.error("This is an exception", new RuntimeException("here"))
+  def run: IO[Unit] = logger.error("This is an exception", new RuntimeException("here"))
+
 }

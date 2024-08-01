@@ -18,12 +18,13 @@ package io
 
 import java.nio.file.OpenOption
 import java.time.LocalDateTime
-import cats.effect.kernel.{Async, Resource, Sync}
+import scala.concurrent.duration.*
+
 import io.odin.formatter.Formatter
 import io.odin.loggers.{ConsoleLogger, FileLogger, RollingFileLogger}
-import io.odin.syntax._
+import io.odin.syntax.*
 
-import scala.concurrent.duration._
+import cats.effect.kernel.{Async, Resource, Sync}
 
 package object odin {
 
@@ -121,4 +122,5 @@ package object odin {
   ): Resource[F, Logger[F]] =
     rollingFileLogger(fileNamePattern, rolloverInterval, maxFileSizeInBytes, formatter, minLevel, openOptions)
       .withAsync(timeWindow, maxBufferSize)
+
 }

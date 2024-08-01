@@ -16,16 +16,18 @@
 
 package io.odin
 
-import cats.Monad
-import cats.effect.std.Dispatcher
-import cats.effect.kernel.{Async, Clock, Resource}
+import scala.concurrent.duration.*
+
+import io.odin.loggers.*
 import io.odin.loggers.{AsyncLogger, ConstContextLogger, ContextualLogger, ContramapLogger, FilterLogger, WithContext}
-import io.odin.loggers._
 import io.odin.meta.Render
 
-import scala.concurrent.duration._
+import cats.effect.kernel.{Async, Clock, Resource}
+import cats.effect.std.Dispatcher
+import cats.Monad
 
 package object syntax {
+
   implicit class LoggerSyntax[F[_]](logger: Logger[F]) {
 
     /**
@@ -87,6 +89,7 @@ package object syntax {
         keys: String*
     )(implicit clock: Clock[F], monad: Monad[F]): Logger[F] =
       logger.contramap(SecretLogger(Set(key) ++ keys))
+
   }
 
   /**
@@ -141,9 +144,13 @@ package object syntax {
         keys: String*
     )(implicit timer: Clock[F], monad: Monad[F]): Resource[F, Logger[F]] =
       resource.map(logger => logger.contramap(SecretLogger(Set(key) ++ keys)))
+
   }
 
   implicit class RenderInterpolator(private val sc: StringContext) extends AnyVal {
-    def render(args: Render.Rendered*): String = sc.s(args: _*)
+
+    def render(args: Render.Rendered*): String = sc.s(args*)
+
   }
+
 }

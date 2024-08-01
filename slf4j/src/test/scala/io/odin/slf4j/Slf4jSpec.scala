@@ -16,19 +16,20 @@
 
 package io.odin.slf4j
 
-import cats.syntax.all._
-import cats.effect.IO
-import cats.effect.kernel.Ref
-import cats.effect.unsafe.IORuntime
-import io.odin.{Level, LoggerMessage, OdinSpec}
-import org.scalacheck.Gen
-import org.slf4j.event.SubstituteLoggingEvent
-import org.slf4j.helpers.SubstituteLogger
-import org.slf4j.{Logger, LoggerFactory}
-import org.slf4j.event.{Level => JLevel}
-
 import java.util.concurrent.LinkedBlockingQueue
 import scala.collection.immutable.Queue
+
+import io.odin.{Level, LoggerMessage, OdinSpec}
+
+import cats.effect.kernel.Ref
+import cats.effect.unsafe.IORuntime
+import cats.effect.IO
+import cats.syntax.all.*
+import org.scalacheck.Gen
+import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.event.Level as JLevel
+import org.slf4j.event.SubstituteLoggingEvent
+import org.slf4j.helpers.SubstituteLogger
 
 class Slf4jSpec extends OdinSpec {
 
@@ -169,8 +170,8 @@ class Slf4jSpec extends OdinSpec {
   }
 
   it should "support Slf4J loggers" in {
-    val logQueue = new LinkedBlockingQueue[SubstituteLoggingEvent]
-    val subLogger = new SubstituteLogger("subLogger", logQueue, false)
+    val logQueue        = new LinkedBlockingQueue[SubstituteLoggingEvent]
+    val subLogger       = new SubstituteLogger("subLogger", logQueue, false)
     val testSlf4JLogger = Slf4jLogger[IO](subLogger)
     testSlf4JLogger.info("test message").unsafeRunSync()
     assert(logQueue.size() == 1)
@@ -180,9 +181,9 @@ class Slf4jSpec extends OdinSpec {
   }
 
   it should "respect minLevel in the Slf4J logger" in {
-    val logQueue = new LinkedBlockingQueue[SubstituteLoggingEvent]
-    val subLogger = new SubstituteLogger("subLogger", logQueue, false)
-    val errorSlf4JLogger = Slf4jLogger[IO](subLogger, Level.Error)
+    val logQueue                          = new LinkedBlockingQueue[SubstituteLoggingEvent]
+    val subLogger                         = new SubstituteLogger("subLogger", logQueue, false)
+    val errorSlf4JLogger                  = Slf4jLogger[IO](subLogger, Level.Error)
     val noErrorLogGen: Gen[LoggerMessage] = loggerMessageGen.filter(_.level < Level.Error)
     forAll(noErrorLogGen) { msg =>
       errorSlf4JLogger.submit(msg).unsafeRunSync()

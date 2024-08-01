@@ -19,7 +19,7 @@ package io.odin.util
 import java.io.File
 import java.nio.file.{Files, Path}
 import java.util.stream.Collectors
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 object ListDirectory {
 

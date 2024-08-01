@@ -17,17 +17,18 @@
 package io.odin
 
 import java.util.concurrent.Executors
-
-import cats.Eq
-import cats.effect.IO
-import cats.effect.unsafe.IORuntime
-import io.odin.formatter.Formatter
-import org.scalacheck.Arbitrary
-
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext
 
+import io.odin.formatter.Formatter
+
+import cats.effect.unsafe.IORuntime
+import cats.effect.IO
+import cats.Eq
+import org.scalacheck.Arbitrary
+
 trait EqInstances {
+
   @tailrec
   final def retrySample[T](implicit arb: Arbitrary[T]): T = arb.arbitrary.sample match {
     case Some(v) => v
@@ -41,8 +42,8 @@ trait EqInstances {
       eqF: Eq[F[Unit]]
   ): Eq[Logger[F]] =
     (x: Logger[F], y: Logger[F]) => {
-      val msg = retrySample[String]
-      val ctx = retrySample[Map[String, String]]
+      val msg       = retrySample[String]
+      val ctx       = retrySample[Map[String, String]]
       val throwable = retrySample[Throwable]
       eqF.eqv(x.trace(msg), y.trace(msg)) &&
       eqF.eqv(x.trace(msg, throwable), y.trace(msg, throwable)) &&
@@ -93,4 +94,5 @@ trait EqInstances {
     }
 
   private val singleThreadCtx: ExecutionContext = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor())
+
 }

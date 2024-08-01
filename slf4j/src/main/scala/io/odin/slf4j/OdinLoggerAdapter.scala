@@ -16,14 +16,15 @@
 
 package io.odin.slf4j
 
-import cats.Eval
+import io.odin.{Level, Logger as OdinLogger, LoggerMessage}
+import io.odin.meta.Position
+
 import cats.effect.kernel.Sync
 import cats.effect.std.Dispatcher
-import cats.syntax.all._
-import io.odin.meta.Position
-import io.odin.{Level, Logger => OdinLogger, LoggerMessage}
-import org.slf4j.Logger
+import cats.syntax.all.*
+import cats.Eval
 import org.slf4j.helpers.{FormattingTuple, MarkerIgnoringBase, MessageFormatter}
+import org.slf4j.Logger
 
 case class OdinLoggerAdapter[F[_]](loggerName: String, underlying: OdinLogger[F])(
     implicit F: Sync[F],
@@ -38,21 +39,21 @@ case class OdinLoggerAdapter[F[_]](loggerName: String, underlying: OdinLogger[F]
     dispatcher.unsafeRunSync(for {
       timestamp <- F.realTime
       _ <- underlying.log(
-        LoggerMessage(
-          level = level,
-          message = Eval.now(msg),
-          context = Map.empty,
-          exception = t,
-          position = Position(
-            fileName = loggerName,
-            enclosureName = loggerName,
-            packageName = loggerName,
-            line = -1
-          ),
-          threadName = Thread.currentThread().getName,
-          timestamp = timestamp.toMillis
-        )
-      )
+             LoggerMessage(
+               level = level,
+               message = Eval.now(msg),
+               context = Map.empty,
+               exception = t,
+               position = Position(
+                 fileName = loggerName,
+                 enclosureName = loggerName,
+                 packageName = loggerName,
+                 line = -1
+               ),
+               threadName = Thread.currentThread().getName,
+               timestamp = timestamp.toMillis
+             )
+           )
     } yield {
       ()
     })
@@ -119,4 +120,5 @@ case class OdinLoggerAdapter[F[_]](loggerName: String, underlying: OdinLogger[F]
 
   def error(msg: String, t: Throwable): Unit =
     run(Level.Error, msg, Option(t))
+
 }

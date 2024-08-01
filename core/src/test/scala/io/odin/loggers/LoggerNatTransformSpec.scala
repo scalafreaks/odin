@@ -16,26 +16,28 @@
 
 package io.odin.loggers
 
-import cats.data.{Writer, WriterT}
-import cats.effect.unsafe.IORuntime
-import cats.effect.{Clock, IO}
-import cats.{~>, Id}
-import io.odin.{Level, Logger, LoggerMessage, OdinSpec}
-
 import scala.concurrent.duration.FiniteDuration
 
+import io.odin.{Level, Logger, LoggerMessage, OdinSpec}
+
+import cats.{~>, Id}
+import cats.data.{Writer, WriterT}
+import cats.effect.{Clock, IO}
+import cats.effect.unsafe.IORuntime
+
 class LoggerNatTransformSpec extends OdinSpec {
-  type F[A] = Writer[List[LoggerMessage], A]
+
+  type F[A]  = Writer[List[LoggerMessage], A]
   type FF[A] = WriterT[IO, List[LoggerMessage], A]
 
   implicit private val ioRuntime: IORuntime = IORuntime.global
 
   it should "transform each method" in {
     forAll { (msg: String, ctx: Map[String, String], throwable: Throwable, ts: FiniteDuration) =>
-      val timestamp = ts.toMillis
+      val timestamp               = ts.toMillis
       implicit val clk: Clock[Id] = fixedClock(timestamp)
-      val logF = logger.withMinimalLevel(Level.Trace)
-      val logFF = logF.mapK(nat).withMinimalLevel(Level.Trace)
+      val logF                    = logger.withMinimalLevel(Level.Trace)
+      val logFF                   = logF.mapK(nat).withMinimalLevel(Level.Trace)
       check(logF.trace(msg), logFF.trace(msg))
       check(logF.trace(msg, throwable), logFF.trace(msg, throwable))
       check(logF.trace(msg, ctx), logFF.trace(msg, ctx))
@@ -75,8 +77,9 @@ class LoggerNatTransformSpec extends OdinSpec {
   private def logger(implicit clock: Clock[Id]): Logger[F] = new WriterTLogger[Id]
 
   private def check(fnF: => F[Unit], fnFF: => FF[Unit]) = {
-    val List(loggerMessageF) = fnF.written: @unchecked
+    val List(loggerMessageF)  = fnF.written: @unchecked
     val List(loggerMessageFF) = fnFF.written.unsafeRunSync(): @unchecked
     loggerMessageEq.eqv(loggerMessageF, loggerMessageFF) shouldBe true
   }
+
 }

@@ -16,11 +16,12 @@
 
 package io.odin.loggers
 
-import cats.Monad
+import io.odin.{Level, Logger, LoggerMessage}
+
 import cats.effect.kernel.Clock
 import cats.mtl.Ask
-import cats.syntax.all._
-import io.odin.{Level, Logger, LoggerMessage}
+import cats.syntax.all.*
+import cats.Monad
 
 /**
   * Logger that extracts context from environment of `F[_]` with the help of [[WithContext]] type class.
@@ -31,6 +32,7 @@ import io.odin.{Level, Logger, LoggerMessage}
   */
 case class ContextualLogger[F[_]: Clock: Monad](inner: Logger[F])(implicit withContext: WithContext[F])
     extends DefaultLogger[F](inner.minLevel) {
+
   def submit(msg: LoggerMessage): F[Unit] =
     withContext.context.flatMap { ctx =>
       inner.log(msg.copy(context = msg.context ++ ctx))
@@ -42,10 +44,13 @@ case class ContextualLogger[F[_]: Clock: Monad](inner: Logger[F])(implicit withC
     }
 
   def withMinimalLevel(level: Level): Logger[F] = copy(inner = inner.withMinimalLevel(level))
+
 }
 
 object ContextualLogger {
+
   def withContext[F[_]: Clock: Monad: WithContext](inner: Logger[F]): Logger[F] = ContextualLogger(inner)
+
 }
 
 /**
@@ -75,4 +80,5 @@ object WithContext {
   ): WithContext[F] = new WithContext[F] {
     def context: F[Map[String, String]] = A.ask.map(hasContext.getContext)
   }
+
 }

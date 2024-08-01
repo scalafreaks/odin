@@ -16,11 +16,12 @@
 
 package io.odin.slf4j
 
+import io.odin.Logger
+
 import cats.effect.kernel.Sync
 import cats.effect.std.Dispatcher
-import io.odin.Logger
-import org.slf4j.ILoggerFactory
 import org.slf4j.spi.LoggerFactoryBinder
+import org.slf4j.ILoggerFactory
 
 abstract class OdinLoggerBinder[F[_]] extends LoggerFactoryBinder {
 

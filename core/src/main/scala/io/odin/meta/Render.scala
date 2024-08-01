@@ -18,8 +18,8 @@ package io.odin.meta
 
 import java.util.UUID
 
-import cats.Show
 import cats.data.NonEmptyList
+import cats.Show
 
 /**
   * Type class that defines how message of type `M` got rendered into String
@@ -39,8 +39,11 @@ object Render extends MidPriorityRender {
   def apply[A](implicit instance: Render[A]): Render[A] = instance
 
   final case class Rendered(override val toString: String) extends AnyVal
+
   object Rendered {
+
     implicit def mat[A](a: A)(implicit r: Render[A]): Rendered = Rendered(r.render(a))
+
   }
 
   /**
@@ -99,4 +102,5 @@ trait LowPriorityRender {
     * Automatically derive [[Render]] instance given `cats.Show`
     */
   implicit def fromShow[M](implicit S: Show[M]): Render[M] = (m: M) => S.show(m)
+
 }

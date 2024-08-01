@@ -24,5 +24,7 @@ trait ToThrowable[E] {
 }
 
 object ToThrowable {
+
   implicit def toThrowable[E <: Throwable]: ToThrowable[E] = (e: E) => e
+
 }

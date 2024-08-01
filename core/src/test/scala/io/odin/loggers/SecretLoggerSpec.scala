@@ -16,11 +16,12 @@
 
 package io.odin.loggers
 
-import cats.Id
+import io.odin.{LoggerMessage, OdinSpec}
+import io.odin.syntax.*
+
 import cats.data.Writer
 import cats.effect.Clock
-import io.odin.syntax._
-import io.odin.{LoggerMessage, OdinSpec}
+import cats.Id
 
 class SecretLoggerSpec extends OdinSpec {
 
@@ -37,8 +38,8 @@ class SecretLoggerSpec extends OdinSpec {
   it should "modify context by hashing secret keys of a message" in {
     forAll { (msg: LoggerMessage) =>
       whenever(msg.context.nonEmpty) {
-        val keys = msg.context.keys.toList
-        val logger = new WriterTLogger[Id].withSecretContext(keys.head, keys.tail: _*)
+        val keys           = msg.context.keys.toList
+        val logger         = new WriterTLogger[Id].withSecretContext(keys.head, keys.tail*)
         val written :: Nil = logger.log(msg).written: @unchecked
         checkHashedResult(msg, written)
       }
@@ -50,8 +51,8 @@ class SecretLoggerSpec extends OdinSpec {
       val keys = msgs.flatMap(_.context.keys)
       whenever(keys.nonEmpty) {
         val msgsWithContext = msgs.filter(_.context.nonEmpty)
-        val logger = new WriterTLogger[Id].withSecretContext(keys.head, keys.tail: _*)
-        val written = logger.log(msgsWithContext).written
+        val logger          = new WriterTLogger[Id].withSecretContext(keys.head, keys.tail*)
+        val written         = logger.log(msgsWithContext).written
         msgsWithContext.zip(written).map {
           case (origin, result) =>
             checkHashedResult(origin, result)

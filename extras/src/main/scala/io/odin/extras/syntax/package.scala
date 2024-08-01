@@ -16,9 +16,10 @@
 
 package io.odin.extras
 
-import cats.effect.kernel.Async
-import io.odin.extras.loggers.ConditionalLogger
 import io.odin.{Level, Logger}
+import io.odin.extras.loggers.ConditionalLogger
+
+import cats.effect.kernel.Async
 
 package object syntax {
 

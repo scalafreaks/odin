@@ -16,13 +16,14 @@
 
 package io.odin.formatter
 
-import cats.syntax.show._
-import io.odin.LoggerMessage
+import scala.annotation.tailrec
+
 import io.odin.formatter.options.{PositionFormat, ThrowableFormat}
 import io.odin.meta.Position
-import perfolation._
+import io.odin.LoggerMessage
 
-import scala.annotation.tailrec
+import cats.syntax.show.*
+import perfolation.*
 
 trait Formatter {
   def format(msg: LoggerMessage): String
@@ -79,11 +80,11 @@ object Formatter {
       if (colorful) s"$color$message${theme.reset}" else message
 
     (msg: LoggerMessage) => {
-      val ctx = if (printCtx) withColor(theme.context, formatCtx(msg.context)) else ""
-      val timestamp = withColor(theme.timestamp, formatTimestamp(msg.timestamp))
+      val ctx        = if (printCtx) withColor(theme.context, formatCtx(msg.context)) else ""
+      val timestamp  = withColor(theme.timestamp, formatTimestamp(msg.timestamp))
       val threadName = withColor(theme.threadName, msg.threadName)
-      val level = withColor(theme.level, msg.level.show)
-      val position = withColor(theme.position, formatPosition(msg.position, positionFormat))
+      val level      = withColor(theme.level, msg.level.show)
+      val position   = withColor(theme.position, formatPosition(msg.position, positionFormat))
 
       val throwable = msg.exception match {
         case Some(t) =>
@@ -100,7 +101,7 @@ object Formatter {
     if (context.isEmpty) {
       ""
     } else {
-      val builder = new StringBuilder(" - ")
+      val builder  = new StringBuilder(" - ")
       val iterator = context.iterator
       while (iterator.hasNext) {
         val (key, value) = iterator.next()
@@ -228,7 +229,7 @@ object Formatter {
         case 1 => builder.append(input.head)
         case _ =>
           val head = input.head
-          val b = if (head.isEmpty) builder.append(questionMark) else builder.append(head.head)
+          val b    = if (head.isEmpty) builder.append(questionMark) else builder.append(head.head)
           loop(input.tail, b.append(dot))
       }
     }
@@ -237,6 +238,6 @@ object Formatter {
   }
 
   private val questionMark = "?"
-  private val dot = "."
+  private val dot          = "."
 
 }

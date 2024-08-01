@@ -16,8 +16,8 @@
 
 package io.odin
 
-import cats.kernel.{LowerBounded, PartialOrder, UpperBounded}
 import cats.{Order, Show}
+import cats.kernel.{LowerBounded, PartialOrder, UpperBounded}
 
 /**
   * Message log level
@@ -25,6 +25,7 @@ import cats.{Order, Show}
 sealed trait Level
 
 object Level {
+
   case object Trace extends Level {
     override val toString: String = "TRACE"
   }
@@ -47,7 +48,7 @@ object Level {
 
   implicit val show: Show[Level] = Show.fromToString[Level]
 
-  implicit val order: Order[Level] with LowerBounded[Level] with UpperBounded[Level] =
+  implicit val order: Order[Level] & LowerBounded[Level] & UpperBounded[Level] =
     new Order[Level] with LowerBounded[Level] with UpperBounded[Level] { self =>
       private def f: Level => Int = {
         case Error => 4
@@ -65,4 +66,5 @@ object Level {
 
       def partialOrder: PartialOrder[Level] = self
     }
+
 }

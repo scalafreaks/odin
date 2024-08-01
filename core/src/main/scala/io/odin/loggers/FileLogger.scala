@@ -36,7 +36,7 @@ case class FileLogger[F[_]](buffer: BufferedWriter, formatter: Formatter, overri
     F.guarantee(msgs.traverse(write(_, formatter)).void, flush)
 
   private def write(msg: LoggerMessage, formatter: Formatter): F[Unit] =
-    F.delay {
+    F.blocking {
       buffer.write(formatter.format(msg) + System.lineSeparator())
     }
 
@@ -57,9 +57,9 @@ object FileLogger {
     def mkDirs: F[Unit] = F.delay {
       Option(Paths.get(fileName).getParent).foreach(_.toFile.mkdirs())
     }
-    def mkBuffer: F[BufferedWriter] = F.delay(Files.newBufferedWriter(Paths.get(fileName), openOptions: _*))
+    def mkBuffer: F[BufferedWriter] = F.blocking(Files.newBufferedWriter(Paths.get(fileName), openOptions: _*))
     def closeBuffer(buffer: BufferedWriter): F[Unit] =
-      F.delay(buffer.close()).handleErrorWith(_ => F.unit)
+      F.blocking(buffer.close()).handleErrorWith(_ => F.unit)
 
     Resource.make(mkDirs >> mkBuffer)(closeBuffer).map { buffer =>
       FileLogger(buffer, formatter, minLevel)

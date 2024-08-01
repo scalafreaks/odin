@@ -17,11 +17,11 @@
 package io.odin.loggers
 
 import java.io.{ByteArrayOutputStream, PrintStream}
-
 import cats.effect.IO
+import cats.effect.kernel.Sync
 import cats.effect.unsafe.IORuntime
-import cats.syntax.all._
-import io.odin.Level._
+import cats.syntax.all.*
+import io.odin.Level.*
 import io.odin.formatter.Formatter
 import io.odin.{Level, LoggerMessage, OdinSpec}
 
@@ -37,7 +37,7 @@ class ConsoleLoggerSpec extends OdinSpec {
         val errBaos = new ByteArrayOutputStream()
         val stdErr = new PrintStream(errBaos)
 
-        val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace)
+        val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
         consoleLogger.log(loggerMessage).unsafeRunSync()
         outBaos.toString() shouldBe (formatter.format(loggerMessage) + System.lineSeparator())
       }
@@ -52,7 +52,7 @@ class ConsoleLoggerSpec extends OdinSpec {
         val errBaos = new ByteArrayOutputStream()
         val stdErr = new PrintStream(errBaos)
 
-        val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace)
+        val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
         consoleLogger.log(loggerMessage).unsafeRunSync()
         errBaos.toString() shouldBe (formatter.format(loggerMessage) + System.lineSeparator())
       }

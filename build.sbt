@@ -1,4 +1,4 @@
-ThisBuild / tlBaseVersion := "0.14"
+ThisBuild / tlBaseVersion := "0.15"
 
 ThisBuild / organization := "dev.scalafreaks"
 ThisBuild / organizationName := "ScalaFreaks"

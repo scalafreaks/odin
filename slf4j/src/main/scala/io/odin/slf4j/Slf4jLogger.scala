@@ -27,7 +27,7 @@ final class Slf4jLogger[F[_]: Sync](
     logger: JLogger,
     level: Level,
     formatter: Formatter,
-    syncType: Sync.Type = Sync.Type.Blocking
+    syncType: Sync.Type
 ) extends DefaultLogger[F](level) {
   override def submit(msg: LoggerMessage): F[Unit] = {
     Sync[F].uncancelable { _ =>
@@ -48,6 +48,7 @@ object Slf4jLogger {
   def apply[F[_]: Sync](
       logger: JLogger = LoggerFactory.getLogger("OdinSlf4jLogger"),
       level: Level = Level.Info,
-      formatter: Formatter = Formatter.default
-  ) = new Slf4jLogger[F](logger, level, formatter)
+      formatter: Formatter = Formatter.default,
+      syncType: Sync.Type = Sync.Type.Blocking
+  ) = new Slf4jLogger[F](logger, level, formatter, syncType)
 }

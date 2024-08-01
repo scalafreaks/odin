@@ -28,7 +28,7 @@ case class ConsoleLogger[F[_]](
     out: PrintStream,
     err: PrintStream,
     override val minLevel: Level,
-    syncType: Sync.Type = Sync.Type.Blocking
+    syncType: Sync.Type
 )(implicit F: Sync[F])
     extends DefaultLogger[F](minLevel) {
   private def println(out: PrintStream, msg: LoggerMessage, formatter: Formatter): F[Unit] =
@@ -45,6 +45,6 @@ case class ConsoleLogger[F[_]](
 }
 
 object ConsoleLogger {
-  def apply[F[_]: Sync](formatter: Formatter, minLevel: Level): Logger[F] =
-    ConsoleLogger(formatter, scala.Console.out, scala.Console.err, minLevel)
+  def apply[F[_]: Sync](formatter: Formatter, minLevel: Level, syncType: Sync.Type = Sync.Type.Blocking): Logger[F] =
+    ConsoleLogger(formatter, scala.Console.out, scala.Console.err, minLevel, syncType)
 }

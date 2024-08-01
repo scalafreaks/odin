@@ -41,7 +41,7 @@ final class Slf4jLogger[F[_]: Sync](
     }
   }
 
-  override def withMinimalLevel(level: Level): Logger[F] = new Slf4jLogger[F](logger, level, formatter)
+  override def withMinimalLevel(level: Level): Logger[F] = new Slf4jLogger[F](logger, level, formatter, syncType)
 }
 
 object Slf4jLogger {

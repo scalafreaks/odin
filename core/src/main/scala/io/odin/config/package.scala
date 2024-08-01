@@ -17,14 +17,14 @@
 package io.odin
 
 import java.time.LocalDateTime
+import scala.annotation.tailrec
 
-import cats.Monad
-import cats.effect.kernel.Clock
-import cats.syntax.all._
 import io.odin.internal.StringContextLength
 import io.odin.loggers.DefaultLogger
 
-import scala.annotation.tailrec
+import cats.effect.kernel.Clock
+import cats.syntax.all.*
+import cats.Monad
 
 package object config extends FileNamePatternSyntax {
 
@@ -41,7 +41,7 @@ package object config extends FileNamePatternSyntax {
     * done during the logging
     */
   def classRouting[F[_]: Clock: Monad](
-      router: (Class[_], Logger[F])*
+      router: (Class[?], Logger[F])*
   ): DefaultBuilder[F] =
     new DefaultBuilder[F](
       new EnclosureRouting(
@@ -99,4 +99,5 @@ package object config extends FileNamePatternSyntax {
   implicit def str2fileNamePattern(str: String): FileNamePattern = {
     Value(str)
   }
+
 }

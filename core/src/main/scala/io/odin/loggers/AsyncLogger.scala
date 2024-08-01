@@ -16,14 +16,15 @@
 
 package io.odin.loggers
 
-import cats.MonadThrow
+import scala.concurrent.duration.*
+
+import io.odin.{Level, Logger, LoggerMessage}
+
 import cats.effect.kernel.{Async, Clock, Resource}
 import cats.effect.std.Dispatcher
 import cats.effect.std.Queue
-import cats.syntax.all._
-import io.odin.{Level, Logger, LoggerMessage}
-
-import scala.concurrent.duration._
+import cats.syntax.all.*
+import cats.MonadThrow
 
 /**
   * AsyncLogger spawns non-cancellable `cats.effect.Fiber` with actual log action encapsulated there.
@@ -33,6 +34,7 @@ import scala.concurrent.duration._
 case class AsyncLogger[F[_]: Clock](queue: Queue[F, LoggerMessage], timeWindow: FiniteDuration, inner: Logger[F])(
     implicit F: MonadThrow[F]
 ) extends DefaultLogger[F](inner.minLevel) {
+
   def submit(msg: LoggerMessage): F[Unit] = {
     queue.tryOffer(msg).void
   }
@@ -49,6 +51,7 @@ case class AsyncLogger[F[_]: Clock](queue: Queue[F, LoggerMessage], timeWindow: 
         case None        => Right(acc)
       }
     }
+
 }
 
 object AsyncLogger {
@@ -84,9 +87,9 @@ object AsyncLogger {
     }
 
     for {
-      queue <- Resource.eval(createQueue)
+      queue  <- Resource.eval(createQueue)
       logger <- Resource.pure(AsyncLogger(queue, timeWindow, inner))
-      _ <- backgroundConsumer(logger)
+      _      <- backgroundConsumer(logger)
     } yield logger
   }
 
@@ -103,4 +106,5 @@ object AsyncLogger {
       implicit F: Async[F],
       dispatcher: Dispatcher[F]
   ): Logger[F] = dispatcher.unsafeRunSync(withAsync(inner, timeWindow, maxBufferSize).allocated)._1
+
 }

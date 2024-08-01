@@ -18,10 +18,12 @@ package io.odin.loggers
 
 import java.io.BufferedWriter
 import java.nio.file.{Files, OpenOption, Paths}
-import cats.effect.kernel.{Resource, Sync}
-import cats.syntax.all._
-import io.odin.formatter.Formatter
+
 import io.odin.{Level, Logger, LoggerMessage}
+import io.odin.formatter.Formatter
+
+import cats.effect.kernel.{Resource, Sync}
+import cats.syntax.all.*
 
 /**
   * Write to given log writer with provided formatter
@@ -29,6 +31,7 @@ import io.odin.{Level, Logger, LoggerMessage}
 case class FileLogger[F[_]](buffer: BufferedWriter, formatter: Formatter, override val minLevel: Level)(
     implicit F: Sync[F]
 ) extends DefaultLogger[F](minLevel) {
+
   def submit(msg: LoggerMessage): F[Unit] =
     F.guarantee(write(msg, formatter), flush)
 
@@ -43,9 +46,11 @@ case class FileLogger[F[_]](buffer: BufferedWriter, formatter: Formatter, overri
   private def flush: F[Unit] = F.delay(buffer.flush()).handleErrorWith(_ => F.unit)
 
   def withMinimalLevel(level: Level): Logger[F] = copy(minLevel = level)
+
 }
 
 object FileLogger {
+
   def apply[F[_]](
       fileName: String,
       formatter: Formatter,
@@ -57,7 +62,7 @@ object FileLogger {
     def mkDirs: F[Unit] = F.delay {
       Option(Paths.get(fileName).getParent).foreach(_.toFile.mkdirs())
     }
-    def mkBuffer: F[BufferedWriter] = F.blocking(Files.newBufferedWriter(Paths.get(fileName), openOptions: _*))
+    def mkBuffer: F[BufferedWriter] = F.blocking(Files.newBufferedWriter(Paths.get(fileName), openOptions*))
     def closeBuffer(buffer: BufferedWriter): F[Unit] =
       F.blocking(buffer.close()).handleErrorWith(_ => F.unit)
 
@@ -65,4 +70,5 @@ object FileLogger {
       FileLogger(buffer, formatter, minLevel)
     }
   }
+
 }

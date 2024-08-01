@@ -19,9 +19,10 @@ package io.odin
 import java.nio.file.{Files, Paths}
 import java.util.UUID
 
+import io.odin.syntax.*
+
 import cats.effect.{IO, IOApp}
-import cats.syntax.all._
-import io.odin.syntax._
+import cats.syntax.all.*
 
 object Test extends IOApp.Simple {
 
@@ -37,4 +38,5 @@ object Test extends IOApp.Simple {
         io.foreverM
       }
       .guarantee(IO.delay(Files.delete(Paths.get(fileName))))
+
 }

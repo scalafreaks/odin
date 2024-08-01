@@ -17,20 +17,21 @@
 package io.odin.loggers
 
 import java.util.concurrent.Executors
-
-import cats.data.WriterT
-import cats.effect.unsafe.IORuntime
-import cats.effect.{Clock, IO}
-import io.odin.syntax._
-import io.odin.{LoggerMessage, OdinSpec}
-
 import scala.concurrent.ExecutionContext
 
+import io.odin.{LoggerMessage, OdinSpec}
+import io.odin.syntax.*
+
+import cats.data.WriterT
+import cats.effect.{Clock, IO}
+import cats.effect.unsafe.IORuntime
+
 class ConstContextLoggerSpec extends OdinSpec {
+
   type F[A] = WriterT[IO, List[LoggerMessage], A]
 
-  implicit val clock: Clock[IO] = zeroClock
-  implicit val ioRuntime: IORuntime = IORuntime.global
+  implicit val clock: Clock[IO]                 = zeroClock
+  implicit val ioRuntime: IORuntime             = IORuntime.global
   private val singleThreadCtx: ExecutionContext = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor())
 
   checkAll(
@@ -43,7 +44,7 @@ class ConstContextLoggerSpec extends OdinSpec {
 
   it should "add constant context to the record" in {
     forAll { (loggerMessage: LoggerMessage, ctx: Map[String, String]) =>
-      val logger = new WriterTLogger[IO].withConstContext(ctx)
+      val logger        = new WriterTLogger[IO].withConstContext(ctx)
       val List(written) = logger.log(loggerMessage).written.unsafeRunSync(): @unchecked
       written.context shouldBe loggerMessage.context ++ ctx
     }
@@ -51,9 +52,10 @@ class ConstContextLoggerSpec extends OdinSpec {
 
   it should "add constant context to the records" in {
     forAll { (messages: List[LoggerMessage], ctx: Map[String, String]) =>
-      val logger = new WriterTLogger[IO].withConstContext(ctx)
+      val logger  = new WriterTLogger[IO].withConstContext(ctx)
       val written = logger.log(messages).written.unsafeRunSync()
       written.map(_.context) shouldBe messages.map(_.context ++ ctx)
     }
   }
+
 }

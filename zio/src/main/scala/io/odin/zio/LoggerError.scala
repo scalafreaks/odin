@@ -32,10 +32,12 @@ case class SecurityException(inner: java.lang.SecurityException) extends LoggerE
 case class Unknown(inner: Throwable) extends LoggerError
 
 object LoggerError {
+
   def apply(t: Throwable): LoggerError = t match {
     case io: java.io.IOException          => IOException(io)
     case sec: java.lang.SecurityException => SecurityException(sec)
     case NonFatal(t)                      => Unknown(t)
     case fatal                            => throw fatal
   }
+
 }

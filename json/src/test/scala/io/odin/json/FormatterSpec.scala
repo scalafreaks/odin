@@ -18,13 +18,15 @@ package io.odin.json
 
 import java.time.Instant
 
-import cats.Eval
+import io.odin.meta.Position
 import io.odin.Level
 import io.odin.LoggerMessage
 import io.odin.OdinSpec
-import io.odin.meta.Position
+
+import cats.Eval
 
 class FormatterSpec extends OdinSpec {
+
   "json.format" should "generate correct json" in {
     val jsonString = Formatter.json.format(
       LoggerMessage(
@@ -34,7 +36,7 @@ class FormatterSpec extends OdinSpec {
         Some(new Exception("test exception")),
         Position.derivePosition,
         "test-thread-1",
-        Instant.EPOCH.toEpochMilli()
+        Instant.EPOCH.toEpochMilli
       )
     )
 
@@ -44,7 +46,7 @@ class FormatterSpec extends OdinSpec {
     jsonString should include(""""message":"just a test"""")
     jsonString should include(""""context":{"a":"field"}""")
     jsonString should include(""""exception":"Caused by: java.lang.Exception: test exception""")
-    jsonString should include(""""position":"io.odin.json.FormatterSpec#jsonString:35"""")
+    jsonString should include(""""position":"io.odin.json.FormatterSpec#jsonString:37"""")
     jsonString should include(""""thread_name":"test-thread-1"""")
     jsonString should include(""""timestamp":"1970-01-01""")
   }
@@ -54,4 +56,5 @@ class FormatterSpec extends OdinSpec {
       noException should be thrownBy Formatter.json.format(m)
     }
   }
+
 }

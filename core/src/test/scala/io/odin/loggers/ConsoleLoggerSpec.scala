@@ -17,13 +17,15 @@
 package io.odin.loggers
 
 import java.io.{ByteArrayOutputStream, PrintStream}
-import cats.effect.IO
+
+import io.odin.{Level, LoggerMessage, OdinSpec}
+import io.odin.formatter.Formatter
+import io.odin.Level.*
+
 import cats.effect.kernel.Sync
 import cats.effect.unsafe.IORuntime
+import cats.effect.IO
 import cats.syntax.all.*
-import io.odin.Level.*
-import io.odin.formatter.Formatter
-import io.odin.{Level, LoggerMessage, OdinSpec}
 
 class ConsoleLoggerSpec extends OdinSpec {
 
@@ -33,9 +35,9 @@ class ConsoleLoggerSpec extends OdinSpec {
     forAll { (loggerMessage: LoggerMessage, formatter: Formatter) =>
       whenever(loggerMessage.level <= Info) {
         val outBaos = new ByteArrayOutputStream()
-        val stdOut = new PrintStream(outBaos)
+        val stdOut  = new PrintStream(outBaos)
         val errBaos = new ByteArrayOutputStream()
-        val stdErr = new PrintStream(errBaos)
+        val stdErr  = new PrintStream(errBaos)
 
         val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
         consoleLogger.log(loggerMessage).unsafeRunSync()
@@ -48,9 +50,9 @@ class ConsoleLoggerSpec extends OdinSpec {
     forAll { (loggerMessage: LoggerMessage, formatter: Formatter) =>
       whenever(loggerMessage.level > Info) {
         val outBaos = new ByteArrayOutputStream()
-        val stdOut = new PrintStream(outBaos)
+        val stdOut  = new PrintStream(outBaos)
         val errBaos = new ByteArrayOutputStream()
-        val stdErr = new PrintStream(errBaos)
+        val stdErr  = new PrintStream(errBaos)
 
         val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
         consoleLogger.log(loggerMessage).unsafeRunSync()
@@ -58,4 +60,5 @@ class ConsoleLoggerSpec extends OdinSpec {
       }
     }
   }
+
 }

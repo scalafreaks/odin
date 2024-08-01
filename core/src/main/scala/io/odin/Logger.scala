@@ -16,12 +16,14 @@
 
 package io.odin
 
-import cats.kernel.UpperBounded
-import cats.syntax.all._
-import cats.{~>, Applicative, Monoid}
 import io.odin.meta.{Position, Render, ToThrowable}
 
+import cats.{~>, Applicative, Monoid}
+import cats.kernel.UpperBounded
+import cats.syntax.all.*
+
 trait Logger[F[_]] {
+
   def minLevel: Level
 
   def withMinimalLevel(level: Level): Logger[F]
@@ -97,6 +99,7 @@ object Logger extends Noop with LoggerInstances {
   def apply[F[_]](implicit instance: Logger[F]): Logger[F] = instance
 
   implicit class LoggerOps[F[_]](logger: Logger[F]) {
+
     def mapK[G[_]](f: F ~> G): Logger[G] = new Logger[G] {
       val minLevel: Level = logger.minLevel
 
@@ -185,15 +188,21 @@ object Logger extends Noop with LoggerInstances {
       ): G[Unit] =
         f(logger.error(msg, ctx, e))
     }
+
   }
+
 }
 
 trait Noop {
+
   def noop[F[_]](implicit F: Applicative[F]): Logger[F] = new NoopLogger[F]
+
 }
 
 trait LoggerInstances {
+
   implicit def monoidLogger[F[_]: Applicative]: Monoid[Logger[F]] = new MonoidLogger[F]
+
 }
 
 private[odin] class NoopLogger[F[_]](val minLevel: Level = UpperBounded[Level].maxBound)(implicit F: Applicative[F])
@@ -264,9 +273,11 @@ private[odin] class NoopLogger[F[_]](val minLevel: Level = UpperBounded[Level].m
       tt: ToThrowable[E],
       position: Position
   ): F[Unit] = F.unit
+
 }
 
 private[odin] class MonoidLogger[F[_]: Applicative] extends Monoid[Logger[F]] {
+
   val empty: Logger[F] = Logger.noop
 
   def combine(x: Logger[F], y: Logger[F]): Logger[F] = new Logger[F] {
@@ -359,4 +370,5 @@ private[odin] class MonoidLogger[F[_]: Applicative] extends Monoid[Logger[F]] {
     ): F[Unit] =
       x.error(msg, ctx, e) *> y.error(msg, ctx, e)
   }
+
 }

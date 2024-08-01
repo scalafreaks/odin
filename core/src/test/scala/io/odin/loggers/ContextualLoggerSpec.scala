@@ -17,22 +17,23 @@
 package io.odin.loggers
 
 import java.util.concurrent.Executors
-
-import cats.data.{ReaderT, WriterT}
-import cats.effect.unsafe.IORuntime
-import cats.effect.{Clock, IO}
-import io.odin.syntax._
-import io.odin.{LoggerMessage, OdinSpec}
-
 import scala.concurrent.ExecutionContext
 
+import io.odin.{LoggerMessage, OdinSpec}
+import io.odin.syntax.*
+
+import cats.data.{ReaderT, WriterT}
+import cats.effect.{Clock, IO}
+import cats.effect.unsafe.IORuntime
+
 class ContextualLoggerSpec extends OdinSpec {
+
   type W[A] = WriterT[IO, List[LoggerMessage], A]
   type F[A] = ReaderT[W, Map[String, String], A]
 
   implicit val hasContext: HasContext[Map[String, String]] = (env: Map[String, String]) => env
-  implicit val clock: Clock[IO] = zeroClock
-  implicit val ioRuntime: IORuntime = IORuntime.global
+  implicit val clock: Clock[IO]                            = zeroClock
+  implicit val ioRuntime: IORuntime                        = IORuntime.global
   private val singleThreadCtx: ExecutionContext = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor())
   private val logger = new WriterTLogger[IO].mapK(ReaderT.liftK[W, Map[String, String]]).withContext
 
@@ -54,4 +55,5 @@ class ContextualLoggerSpec extends OdinSpec {
       written.map(_.context) shouldBe msgs.map(_.context ++ ctx)
     }
   }
+
 }

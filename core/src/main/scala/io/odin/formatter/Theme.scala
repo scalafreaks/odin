@@ -16,7 +16,7 @@
 
 package io.odin.formatter
 
-import scala.io.AnsiColor._
+import scala.io.AnsiColor.*
 
 case class Theme(
     reset: String,
@@ -29,6 +29,7 @@ case class Theme(
 )
 
 object Theme {
+
   val BRIGHT_BLACK = "\u001b[30;1m"
 
   val ansi: Theme = Theme(
@@ -40,4 +41,5 @@ object Theme {
     position = BLUE,
     exception = RED
   )
+
 }

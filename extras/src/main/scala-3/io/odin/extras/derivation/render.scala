@@ -16,17 +16,19 @@
 
 package io.odin.extras.derivation
 
-import io.odin.meta.Render
-import magnolia1.*
-import java.security.MessageDigest
 import java.math.BigInteger
+import java.security.MessageDigest
+
+import io.odin.meta.Render
+
+import magnolia1.*
 
 object render extends Derivation[Render] {
 
   type Typeclass[A] = Render[A]
 
   def join[A](ctx: CaseClass[Typeclass, A]): Typeclass[A] = value => {
-    if (ctx.isValueClass) {
+    if ctx.isValueClass then {
       ctx.params.headOption.fold("")(param => param.typeclass.render(param.deref(value)))
     } else {
       val includeMemberNames = RenderUtils.includeMemberNames(ctx)
@@ -38,7 +40,7 @@ object render extends Derivation[Render] {
             RenderUtils.renderParam(param.label, RenderUtils.SecretPlaceholder, includeMemberNames)
 
           case param if RenderUtils.shouldBeHashed(param) =>
-            val label = s"${param.label} (sha256 hash)"
+            val label     = s"${param.label} (sha256 hash)"
             val plaintext = param.typeclass.render(param.deref(value))
             RenderUtils.renderParam(label, RenderUtils.sha256(plaintext), includeMemberNames)
 
@@ -58,7 +60,9 @@ object render extends Derivation[Render] {
   }
 
   extension (r: Render.type) {
+
     inline def derived[A: scala.deriving.Mirror.Of]: Render[A] = render.derived[A]
+
   }
 
 }
@@ -84,14 +88,14 @@ private object RenderUtils {
     param.annotations.contains(hidden())
 
   @inline def renderParam(label: String, value: String, includeMemberName: Boolean): String =
-    if (includeMemberName) s"$label = $value" else value
+    if includeMemberName then s"$label = $value" else value
 
   def renderWithLimit[A](param: Param[Render, A], value: A, limit: Int, includeMemberNames: Boolean): String =
     param.deref(value) match {
-      case c: Iterable[_] =>
-        val diff = c.iterator.length - limit
-        val suffix = if (diff > 0) s"($diff more)" else ""
-        val value = param.typeclass.render(c.take(limit).asInstanceOf[param.PType]) + suffix
+      case c: Iterable[?] =>
+        val diff   = c.iterator.length - limit
+        val suffix = if diff > 0 then s"($diff more)" else ""
+        val value  = param.typeclass.render(c.take(limit).asInstanceOf[param.PType]) + suffix
 
         renderParam(param.label, value, includeMemberNames)
 
@@ -106,8 +110,10 @@ private object RenderUtils {
   }
 
   object hasLengthLimit {
+
     def unapply[A](arg: Param[Render, A]): Option[(Param[Render, A], Int)] =
       arg.annotations.collectFirst { case length(limit) => (arg, limit) }
+
   }
 
 }

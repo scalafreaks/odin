@@ -16,11 +16,12 @@
 
 package io.odin.json
 
-import com.github.plokhotnyuk.jsoniter_scala.core._
-import io.odin.LoggerMessage
-import io.odin.formatter.{Formatter => OFormatter}
-import io.odin.formatter.Formatter._
 import io.odin.formatter.options.{PositionFormat, ThrowableFormat}
+import io.odin.formatter.Formatter.*
+import io.odin.formatter.Formatter as OFormatter
+import io.odin.LoggerMessage
+
+import com.github.plokhotnyuk.jsoniter_scala.core.*
 
 object Formatter {
 
@@ -42,4 +43,5 @@ object Formatter {
       )
     )
   }
+
 }

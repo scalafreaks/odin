@@ -16,9 +16,10 @@
 
 package io.odin.examples
 
+import io.odin.*
+import io.odin.syntax.*
+
 import cats.effect.{IO, IOApp}
-import io.odin._
-import io.odin.syntax._
 
 /**
   * Modify logger message before it's written

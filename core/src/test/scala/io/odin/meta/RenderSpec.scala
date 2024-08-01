@@ -17,17 +17,18 @@
 package io.odin.meta
 
 import java.util.UUID
-
-import cats.Show
-import cats.data.NonEmptyList
-import cats.laws.discipline.arbitrary._
-import cats.syntax.all._
-import io.odin.OdinSpec
-import org.scalacheck.{Arbitrary, Gen}
-
 import scala.reflect.ClassTag
 
+import io.odin.OdinSpec
+
+import cats.data.NonEmptyList
+import cats.laws.discipline.arbitrary.*
+import cats.syntax.all.*
+import cats.Show
+import org.scalacheck.{Arbitrary, Gen}
+
 class RenderSpec extends OdinSpec {
+
   it should "derive Render instance from cats.Show" in {
     val renderer = Render[Foo]
     forAll { (foo: Foo) =>
@@ -43,7 +44,7 @@ class RenderSpec extends OdinSpec {
   }
 
   it should "interpolate a string using Render for every argument" in {
-    import io.odin.syntax._
+    import io.odin.syntax.*
 
     implicit val intRender: Render[Int] = Render.fromToString
 
@@ -92,7 +93,9 @@ class RenderSpec extends OdinSpec {
 case class Foo(x: String)
 
 object Foo {
+
   implicit val fooShow: Show[Foo] = foo => foo.x
 
   implicit val arbitraryFoo: Arbitrary[Foo] = Arbitrary(Gen.alphaNumStr.map(Foo(_)))
+
 }

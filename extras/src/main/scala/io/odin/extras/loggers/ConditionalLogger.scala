@@ -16,15 +16,16 @@
 
 package io.odin.extras.loggers
 
-import cats.MonadError
+import io.odin.{Level, Logger, LoggerMessage}
+import io.odin.loggers.DefaultLogger
+
 import cats.effect.kernel.{Async, Clock, Resource}
 import cats.effect.kernel.Resource.ExitCase
 import cats.effect.std.Queue
-import cats.syntax.applicativeError._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import io.odin.loggers.DefaultLogger
-import io.odin.{Level, Logger, LoggerMessage}
+import cats.syntax.applicativeError.*
+import cats.syntax.flatMap.*
+import cats.syntax.functor.*
+import cats.MonadError
 
 final case class ConditionalLogger[F[_]: Clock] private (
     queue: Queue[F, LoggerMessage],

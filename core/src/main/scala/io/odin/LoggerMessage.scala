@@ -16,8 +16,9 @@
 
 package io.odin
 
-import cats.Eval
 import io.odin.meta.Position
+
+import cats.Eval
 
 /**
   * Final log message that contains all the possible information to render

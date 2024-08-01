@@ -16,14 +16,16 @@
 
 package io.odin.slf4j
 
-import cats.effect.IO
+import io.odin.{Level, Logger}
+
 import cats.effect.kernel.Sync
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global
-import io.odin.{Level, Logger}
+import cats.effect.IO
 
 class ExternalLogger extends OdinLoggerBinder[IO] {
-  implicit val F: Sync[IO] = IO.asyncForIO
+
+  implicit val F: Sync[IO]                = IO.asyncForIO
   implicit val dispatcher: Dispatcher[IO] = Dispatcher.sequential[IO].allocated.unsafeRunSync()._1
 
   val loggers: PartialFunction[String, Logger[IO]] = {
@@ -35,4 +37,5 @@ class ExternalLogger extends OdinLoggerBinder[IO] {
     case _ =>
       new BufferingLogger[IO](Level.Trace)
   }
+
 }

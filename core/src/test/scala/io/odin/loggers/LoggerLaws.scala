@@ -16,12 +16,14 @@
 
 package io.odin.loggers
 
-import cats.Monad
-import cats.kernel.laws.{IsEq, _}
-import cats.syntax.all._
 import io.odin.{Level, Logger, LoggerMessage}
 
+import cats.kernel.laws.{IsEq, *}
+import cats.syntax.all.*
+import cats.Monad
+
 trait LoggerLaws[F[_]] {
+
   implicit val F: Monad[F]
   val written: F[Unit] => List[LoggerMessage]
 
@@ -72,4 +74,5 @@ trait LoggerLaws[F[_]] {
   ): IsEq[List[LoggerMessage]] = {
     written(logger.log(msgs)) <-> written(msgs.traverse_(logger.log)(F))
   }
+
 }

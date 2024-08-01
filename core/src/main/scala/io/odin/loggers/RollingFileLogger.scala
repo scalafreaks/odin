@@ -19,14 +19,15 @@ package io.odin.loggers
 import java.nio.file.{Files, OpenOption, Path, Paths}
 import java.time.LocalDateTime
 import java.util.TimeZone
-import cats.effect.kernel._
-import cats.effect.std.Hotswap
-import cats.syntax.all._
-import cats.{Functor, Monad}
-import io.odin.formatter.Formatter
-import io.odin.{Level, Logger, LoggerMessage}
+import scala.concurrent.duration.*
 
-import scala.concurrent.duration._
+import io.odin.{Level, Logger, LoggerMessage}
+import io.odin.formatter.Formatter
+
+import cats.{Functor, Monad}
+import cats.effect.kernel.*
+import cats.effect.std.Hotswap
+import cats.syntax.all.*
 
 object RollingFileLogger {
 
@@ -70,6 +71,7 @@ object RollingFileLogger {
     override def submit(msgs: List[LoggerMessage]): F[Unit] = current.get.flatMap(_.log(msgs))
 
     def withMinimalLevel(level: Level): Logger[F] = copy(minLevel = level)
+
   }
 
   private[odin] class RollingFileLoggerFactory[F[_]](
@@ -87,10 +89,10 @@ object RollingFileLogger {
 
     def mk: Resource[F, Logger[F]] =
       for {
-        hotswap <- Hotswap[F, (Logger[F], RolloverSignal)](allocate)
+        hotswap                       <- Hotswap[F, (Logger[F], RolloverSignal)](allocate)
         (hs, (logger, rolloverSignal)) = hotswap
-        refLogger <- Resource.eval(Ref.of(logger))
-        _ <- F.background(rollingLoop(hs, rolloverSignal, refLogger))
+        refLogger                     <- Resource.eval(Ref.of(logger))
+        _                             <- F.background(rollingLoop(hs, rolloverSignal, refLogger))
       } yield RefLogger(refLogger, minLevel)
 
     private def now: F[Long] = F.realTime.map(_.toMillis)
@@ -138,17 +140,17 @@ object RollingFileLogger {
             }
           time <- now
           _ <- F.unlessA(checkConditions(start, time, size)) {
-            for {
-              _ <- F.sleep(100.millis)
-              _ <- loop(start)
-            } yield ()
-          }
+                 for {
+                   _ <- F.sleep(100.millis)
+                   _ <- loop(start)
+                 } yield ()
+               }
         } yield ()
       }
 
       for {
         rolloverSignal <- Resource.eval(Deferred[F, Unit])
-        _ <- F.background(now >>= loop >>= rolloverSignal.complete)
+        _              <- F.background(now >>= loop >>= rolloverSignal.complete)
       } yield rolloverSignal
     }
 

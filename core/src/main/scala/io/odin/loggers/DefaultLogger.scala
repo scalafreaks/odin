@@ -16,11 +16,12 @@
 
 package io.odin.loggers
 
+import io.odin.{Level, Logger, LoggerMessage}
+import io.odin.meta.{Position, Render, ToThrowable}
+
 import cats.{Eval, Monad}
 import cats.effect.kernel.Clock
-import cats.syntax.all._
-import io.odin.meta.{Position, Render, ToThrowable}
-import io.odin.{Level, Logger, LoggerMessage}
+import cats.syntax.all.*
 
 /**
   * Default logger that relies on implicits of `Clock[F]` and `Monad[F]` to get timestamp and create log
@@ -28,6 +29,7 @@ import io.odin.{Level, Logger, LoggerMessage}
   */
 abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F], F: Monad[F]) extends Logger[F] {
   self =>
+
   private def log[M](level: Level, msg: => M, ctx: Map[String, String] = Map.empty, t: Option[Throwable] = None)(
       implicit render: Render[M],
       position: Position
@@ -35,21 +37,22 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
     for {
       timestamp <- clock.realTime
       _ <- log(
-        LoggerMessage(
-          level = level,
-          message = Eval.later(render.render(msg)),
-          context = ctx,
-          exception = t,
-          position = position,
-          threadName = Thread.currentThread().getName,
-          timestamp = timestamp.toMillis
-        )
-      )
+             LoggerMessage(
+               level = level,
+               message = Eval.later(render.render(msg)),
+               context = ctx,
+               exception = t,
+               position = position,
+               threadName = Thread.currentThread().getName,
+               timestamp = timestamp.toMillis
+             )
+           )
     } yield {
       ()
     }
 
   def submit(msg: LoggerMessage): F[Unit]
+
   def submit(msgs: List[LoggerMessage]): F[Unit] = msgs.traverse_(msg => submit(msg))
 
   def log(msg: LoggerMessage): F[Unit] = F.whenA(msg.level >= minLevel)(self.submit(msg))
@@ -176,4 +179,5 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
     F.whenA(minLevel <= Level.Error) {
       log(Level.Error, msg, ctx, Option(tt.throwable(e)))
     }
+
 }

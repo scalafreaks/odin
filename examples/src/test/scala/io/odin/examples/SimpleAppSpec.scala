@@ -16,11 +16,12 @@
 
 package io.odin.examples
 
-import cats.data.WriterT
-import cats.effect.IO
-import cats.effect.unsafe.IORuntime
 import io.odin.{Logger, LoggerMessage, OdinSpec}
 import io.odin.loggers.WriterTLogger
+
+import cats.data.WriterT
+import cats.effect.unsafe.IORuntime
+import cats.effect.IO
 
 /**
   * This spec shows an example of how to test the logger using WriterT monad that is just an abstraction over `F[(Log, A)]`
@@ -33,7 +34,7 @@ class SimpleAppSpec extends OdinSpec {
 
   "HelloSimpleService" should "log greeting call" in {
     // logger that writes messages as a log of WriterT monad
-    val logger: Logger[WT] = new WriterTLogger[IO]
+    val logger: Logger[WT]                    = new WriterTLogger[IO]
     val simpleService: HelloSimpleService[WT] = new HelloSimpleService(logger)
 
     val name = "UserName"

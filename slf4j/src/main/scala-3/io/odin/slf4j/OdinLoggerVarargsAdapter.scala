@@ -16,10 +16,11 @@
 
 package io.odin.slf4j
 
-import io.odin.Level
-import org.slf4j.helpers.MessageFormatter
-
 import scala.annotation.varargs
+
+import io.odin.Level
+
+import org.slf4j.helpers.MessageFormatter
 
 trait OdinLoggerVarargsAdapter[F[_]] { self: OdinLoggerAdapter[F] =>
 

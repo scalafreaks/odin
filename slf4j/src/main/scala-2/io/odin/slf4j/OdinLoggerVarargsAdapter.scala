@@ -17,6 +17,7 @@
 package io.odin.slf4j
 
 import io.odin.Level
+
 import org.slf4j.helpers.MessageFormatter
 
 trait OdinLoggerVarargsAdapter[F[_]] { self: OdinLoggerAdapter[F] =>

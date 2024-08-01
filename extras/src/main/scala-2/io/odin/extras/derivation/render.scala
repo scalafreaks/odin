@@ -16,10 +16,12 @@
 
 package io.odin.extras.derivation
 
-import io.odin.meta.Render
-import magnolia1._
-import java.security.MessageDigest
 import java.math.BigInteger
+import java.security.MessageDigest
+
+import io.odin.meta.Render
+
+import magnolia1.*
 
 object render {
 
@@ -38,7 +40,7 @@ object render {
             RenderUtils.renderParam(param.label, RenderUtils.SecretPlaceholder, includeMemberNames)
 
           case param if RenderUtils.shouldBeHashed(param) =>
-            val label = s"${param.label} (sha256 hash)"
+            val label     = s"${param.label} (sha256 hash)"
             val plaintext = param.typeclass.render(param.dereference(value))
             RenderUtils.renderParam(label, RenderUtils.sha256(plaintext), includeMemberNames)
 
@@ -113,10 +115,10 @@ private object RenderUtils {
 
   def renderWithLimit[A](param: Param[Render, A], value: A, limit: Int, includeMemberNames: Boolean): String =
     param.dereference(value) match {
-      case c: Iterable[_] =>
-        val diff = c.iterator.length - limit
+      case c: Iterable[?] =>
+        val diff   = c.iterator.length - limit
         val suffix = if (diff > 0) s"($diff more)" else ""
-        val value = param.typeclass.render(c.take(limit).asInstanceOf[param.PType]) + suffix
+        val value  = param.typeclass.render(c.take(limit).asInstanceOf[param.PType]) + suffix
 
         renderParam(param.label, value, includeMemberNames)
 
@@ -131,8 +133,10 @@ private object RenderUtils {
   }
 
   object hasLengthLimit {
+
     def unapply[A](arg: Param[Render, A]): Option[(Param[Render, A], Int)] =
       arg.annotations.collectFirst { case length(limit) => (arg, limit) }
+
   }
 
 }

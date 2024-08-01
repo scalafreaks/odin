@@ -16,14 +16,15 @@
 
 package io.odin.formatter
 
-import io.odin.formatter.FormatterSpec.TestException
-import io.odin.formatter.options.ThrowableFormat.{Depth, Filter, Indent}
-import io.odin.formatter.options.{PositionFormat, ThrowableFormat}
-import io.odin.meta.Position
-import io.odin.{LoggerMessage, OdinSpec}
-import org.scalacheck.Gen
-
 import scala.util.control.NoStackTrace
+
+import io.odin.{LoggerMessage, OdinSpec}
+import io.odin.formatter.options.{PositionFormat, ThrowableFormat}
+import io.odin.formatter.options.ThrowableFormat.{Depth, Filter, Indent}
+import io.odin.formatter.FormatterSpec.TestException
+import io.odin.meta.Position
+
+import org.scalacheck.Gen
 
 class FormatterSpec extends OdinSpec {
 
@@ -40,7 +41,7 @@ class FormatterSpec extends OdinSpec {
 
     val format = ThrowableFormat(Depth.Full, indent, Filter.NoFilter)
     val result = Formatter.formatThrowable(error2, format)
-    val lines = result.split(System.lineSeparator()).toList
+    val lines  = result.split(System.lineSeparator()).toList
 
     val (cause, trace) = lines.partition(_.startsWith("Caused by"))
 
@@ -66,7 +67,7 @@ class FormatterSpec extends OdinSpec {
 
     val format = ThrowableFormat(depth, indent, Filter.NoFilter)
     val result = Formatter.formatThrowable(error2, format)
-    val lines = result.split(System.lineSeparator()).toList
+    val lines  = result.split(System.lineSeparator()).toList
 
     val (cause, trace) = lines.partition(_.startsWith("Caused by"))
 
@@ -103,7 +104,7 @@ class FormatterSpec extends OdinSpec {
 
     val format = ThrowableFormat(Depth.Full, Indent.Fixed(2), filter)
     val result = Formatter.formatThrowable(error2, format)
-    val lines = result.split(System.lineSeparator()).toList
+    val lines  = result.split(System.lineSeparator()).toList
 
     val (cause, trace) = lines.partition(_.startsWith("Caused by"))
     val expectedCausedBy = List(
@@ -138,7 +139,7 @@ class FormatterSpec extends OdinSpec {
   it should "not abbreviate empty package" in {
     val position = Position("file.scala", "enclosingMethod", "", -1)
 
-    val full = Formatter.formatPosition(position, PositionFormat.Full)
+    val full        = Formatter.formatPosition(position, PositionFormat.Full)
     val abbreviated = Formatter.formatPosition(position, PositionFormat.AbbreviatePackage)
 
     full shouldBe "enclosingMethod"
@@ -177,7 +178,7 @@ class FormatterSpec extends OdinSpec {
 
   it should "output colored messages according to the theme" in {
     forAll { (msg: LoggerMessage) =>
-      val theme = Theme.ansi
+      val theme     = Theme.ansi
       val formatted = Formatter.create(theme).format(msg)
 
       msg.threadName should not include theme.threadName

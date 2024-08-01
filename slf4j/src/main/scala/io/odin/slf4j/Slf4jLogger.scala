@@ -16,12 +16,13 @@
 
 package io.odin.slf4j
 
-import cats.effect.kernel.Sync
+import io.odin.{Level, Logger, LoggerMessage}
 import io.odin.formatter.Formatter
 import io.odin.loggers.DefaultLogger
-import io.odin.{Level, Logger, LoggerMessage}
-import org.slf4j.{Logger => JLogger, LoggerFactory}
-import cats.implicits._
+
+import cats.effect.kernel.Sync
+import cats.implicits.*
+import org.slf4j.{Logger as JLogger, LoggerFactory}
 
 final class Slf4jLogger[F[_]: Sync](
     logger: JLogger,
@@ -29,6 +30,7 @@ final class Slf4jLogger[F[_]: Sync](
     formatter: Formatter,
     syncType: Sync.Type
 ) extends DefaultLogger[F](level) {
+
   override def submit(msg: LoggerMessage): F[Unit] = {
     Sync[F].uncancelable { _ =>
       Sync[F].whenA(msg.level >= this.minLevel)(msg.level match {
@@ -42,13 +44,16 @@ final class Slf4jLogger[F[_]: Sync](
   }
 
   override def withMinimalLevel(level: Level): Logger[F] = new Slf4jLogger[F](logger, level, formatter, syncType)
+
 }
 
 object Slf4jLogger {
+
   def apply[F[_]: Sync](
       logger: JLogger = LoggerFactory.getLogger("OdinSlf4jLogger"),
       level: Level = Level.Info,
       formatter: Formatter = Formatter.default,
       syncType: Sync.Type = Sync.Type.Blocking
   ) = new Slf4jLogger[F](logger, level, formatter, syncType)
+
 }

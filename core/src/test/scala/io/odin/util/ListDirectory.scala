@@ -23,8 +23,7 @@ import scala.jdk.CollectionConverters.*
 
 object ListDirectory {
 
-  def apply(path: Path): List[File] = {
+  def apply(path: Path): List[File] =
     Files.list(path).collect(Collectors.toList[Path]).asScala.toList.map(_.toFile)
-  }
 
 }

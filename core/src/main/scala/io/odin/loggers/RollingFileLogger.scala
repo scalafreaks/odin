@@ -61,7 +61,7 @@ object RollingFileLogger {
     if (maxFileSizeInBytes.isDefined || rolloverInterval.isDefined) rollingLogger else fileLogger
   }
 
-  final private[odin] class RefLogger[F[_]: Clock: Monad](
+  private[odin] final class RefLogger[F[_]: Clock: Monad](
       current: Ref[F, Logger[F]],
       override val minLevel: Level
   ) extends DefaultLogger[F](minLevel) {
@@ -74,7 +74,7 @@ object RollingFileLogger {
 
   }
 
-  final private[odin] class RollingFileLoggerFactory[F[_]](
+  private[odin] final class RollingFileLoggerFactory[F[_]](
       fileNamePattern: LocalDateTime => String,
       maxFileSizeInBytes: Option[Long],
       rolloverInterval: Option[FiniteDuration],

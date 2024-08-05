@@ -30,7 +30,7 @@ class LoggerNatTransformSpec extends OdinSpec {
   type F[A]  = Writer[List[LoggerMessage], A]
   type FF[A] = WriterT[IO, List[LoggerMessage], A]
 
-  implicit private val ioRuntime: IORuntime = IORuntime.global
+  private implicit val ioRuntime: IORuntime = IORuntime.global
 
   it should "transform each method" in {
     forAll { (msg: String, ctx: Map[String, String], throwable: Throwable, ts: FiniteDuration) =>

@@ -29,7 +29,7 @@ import cats.effect.unsafe.IORuntime
 
 class FileLoggerSpec extends OdinSpec {
 
-  implicit private val ioRuntime: IORuntime = IORuntime.global
+  private implicit val ioRuntime: IORuntime = IORuntime.global
 
   private val fileResource = Resource.make[IO, Path] {
     IO.delay(Files.createTempFile(UUID.randomUUID().toString, ""))

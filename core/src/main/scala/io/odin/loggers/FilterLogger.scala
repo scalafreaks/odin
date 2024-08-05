@@ -24,7 +24,7 @@ import cats.Monad
 /**
   * Filter each `LoggerMessage` using given predicate before passing it to the next logger
   */
-final private[loggers] class FilterLogger[F[_]: Clock](fn: LoggerMessage => Boolean, inner: Logger[F])(
+private[loggers] final class FilterLogger[F[_]: Clock](fn: LoggerMessage => Boolean, inner: Logger[F])(
     implicit F: Monad[F]
 ) extends DefaultLogger[F](inner.minLevel) {
 

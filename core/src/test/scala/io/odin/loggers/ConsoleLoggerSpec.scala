@@ -29,7 +29,7 @@ import cats.syntax.all.*
 
 class ConsoleLoggerSpec extends OdinSpec {
 
-  implicit private val ioRuntime: IORuntime = IORuntime.global
+  private implicit val ioRuntime: IORuntime = IORuntime.global
 
   it should "route all messages with level <= INFO to stdout" in {
     forAll { (loggerMessage: LoggerMessage, formatter: Formatter) =>

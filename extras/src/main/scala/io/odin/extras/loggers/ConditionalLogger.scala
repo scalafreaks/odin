@@ -27,7 +27,7 @@ import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.MonadError
 
-final private[loggers] case class ConditionalLogger[F[_]: Clock](
+private[loggers] final case class ConditionalLogger[F[_]: Clock](
     queue: Queue[F, LoggerMessage],
     inner: Logger[F],
     override val minLevel: Level

@@ -24,7 +24,7 @@ import cats.Monad
 /**
   * Apply given function to each `LoggerMessage` before passing it to the next logger
   */
-final private[loggers] class ContramapLogger[F[_]: Clock: Monad](
+private[loggers] final class ContramapLogger[F[_]: Clock: Monad](
     fn: LoggerMessage => LoggerMessage,
     inner: Logger[F]
 ) extends DefaultLogger[F](inner.minLevel) {

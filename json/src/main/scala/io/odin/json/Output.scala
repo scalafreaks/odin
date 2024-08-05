@@ -22,7 +22,7 @@ import cats.syntax.show.*
 import com.github.plokhotnyuk.jsoniter_scala.core.*
 import com.github.plokhotnyuk.jsoniter_scala.macros.*
 
-final private[json] case class Output(
+private[json] final case class Output(
     level: Level,
     message: String,
     context: Map[String, String],
@@ -34,7 +34,7 @@ final private[json] case class Output(
 
 object Output {
 
-  implicit private[json] val levelCodec: JsonValueCodec[Level] = new JsonValueCodec[Level] {
+  private[json] implicit val levelCodec: JsonValueCodec[Level] = new JsonValueCodec[Level] {
 
     // we never decode these
     override def decodeValue(in: JsonReader, default: Level): Level = ???
@@ -45,7 +45,7 @@ object Output {
 
   }
 
-  implicit private[json] val codec: JsonValueCodec[Output] =
+  private[json] implicit val codec: JsonValueCodec[Output] =
     JsonCodecMaker.make(CodecMakerConfig.withFieldNameMapper(JsonCodecMaker.enforce_snake_case))
 
 }

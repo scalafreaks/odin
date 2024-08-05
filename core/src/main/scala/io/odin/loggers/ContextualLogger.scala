@@ -30,7 +30,7 @@ import cats.Monad
   * function `A => M[B]`. If there is a way to extract context `Map[String, String]` from the `A` (see [[HasContext]]),
   * then it's possible to add this context to the log.
   */
-final private[loggers] class ContextualLogger[F[_]: Clock: Monad](inner: Logger[F])(
+private[loggers] final class ContextualLogger[F[_]: Clock: Monad](inner: Logger[F])(
     implicit withContext: WithContext[F]
 ) extends DefaultLogger[F](inner.minLevel) {
 

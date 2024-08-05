@@ -24,6 +24,7 @@ import io.odin.loggers.DefaultLogger
 import cats.effect.kernel.Ref
 import cats.effect.Sync
 
+@deprecated("This logger will be moved to internal library test sources", "Odin 0.15.0")
 case class BufferingLogger[F[_]](override val minLevel: Level)(implicit F: Sync[F]) extends DefaultLogger[F](minLevel) {
 
   val buffer: Ref[F, Queue[LoggerMessage]] = Ref.unsafe[F, Queue[LoggerMessage]](Queue.empty)

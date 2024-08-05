@@ -16,6 +16,8 @@
 
 package io.odin.slf4j
 
+import scala.annotation.nowarn
+
 import io.odin.{Level, Logger}
 
 import cats.effect.kernel.Sync
@@ -23,6 +25,7 @@ import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 
+@nowarn("cat=deprecation&origin=io.odin.slf4j.BufferingLogger")
 class ExternalLogger extends OdinLoggerBinder[IO] {
 
   implicit val F: Sync[IO]                = IO.asyncForIO
@@ -34,8 +37,7 @@ class ExternalLogger extends OdinLoggerBinder[IO] {
     case Level.Info.toString  => new BufferingLogger[IO](Level.Info)
     case Level.Warn.toString  => new BufferingLogger[IO](Level.Warn)
     case Level.Error.toString => new BufferingLogger[IO](Level.Error)
-    case _ =>
-      new BufferingLogger[IO](Level.Trace)
+    case _                    => new BufferingLogger[IO](Level.Trace)
   }
 
 }

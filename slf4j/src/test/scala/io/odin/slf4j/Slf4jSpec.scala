@@ -17,6 +17,7 @@
 package io.odin.slf4j
 
 import java.util.concurrent.LinkedBlockingQueue
+import scala.annotation.nowarn
 import scala.collection.immutable.Queue
 
 import io.odin.{Level, LoggerMessage, OdinSpec}
@@ -31,6 +32,7 @@ import org.slf4j.event.Level as JLevel
 import org.slf4j.event.SubstituteLoggingEvent
 import org.slf4j.helpers.SubstituteLogger
 
+@nowarn("cat=deprecation&origin=io.odin.slf4j.BufferingLogger")
 class Slf4jSpec extends OdinSpec {
 
   implicit private val ioRuntime: IORuntime = IORuntime.global

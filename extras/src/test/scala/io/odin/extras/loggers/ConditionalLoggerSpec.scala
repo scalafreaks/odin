@@ -42,8 +42,8 @@ class ConditionalLoggerSpec extends OdinSpec {
 
   }
 
-  implicit private val ioRuntime: IORuntime                        = IORuntime.global
-  implicit private val hasContext: HasContext[Map[String, String]] = (env: Map[String, String]) => env
+  private implicit val ioRuntime: IORuntime                        = IORuntime.global
+  private implicit val hasContext: HasContext[Map[String, String]] = (env: Map[String, String]) => env
 
   it should "use log level of the inner logger in case of success" in {
     forAll { (messages: List[LoggerMessage], ctx: Map[String, String]) =>

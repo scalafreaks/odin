@@ -26,7 +26,7 @@ import cats.syntax.all.*
 
 class ConfigSpec extends OdinSpec {
 
-  implicit private val ioRuntime: IORuntime = IORuntime.global
+  private implicit val ioRuntime: IORuntime = IORuntime.global
 
   type F[A] = WriterT[IO, List[(String, LoggerMessage)], A]
 

@@ -32,7 +32,7 @@ import cats.effect.unsafe.IORuntime
 
 class RollingFileLoggerSpec extends OdinSpec {
 
-  implicit private val ioRuntime: IORuntime = IORuntime.global
+  private implicit val ioRuntime: IORuntime = IORuntime.global
 
   private val fileResource = Resource.make[IO, Path] {
     IO.delay(Files.createTempDirectory(UUID.randomUUID().toString))

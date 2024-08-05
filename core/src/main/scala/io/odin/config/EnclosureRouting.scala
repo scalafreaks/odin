@@ -26,7 +26,7 @@ import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import cats.Monad
 
-final private[config] class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router: List[(String, Logger[F])])(
+private[config] final class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router: List[(String, Logger[F])])(
     implicit F: Monad[F]
 ) extends DefaultLogger(Level.Trace) {
 

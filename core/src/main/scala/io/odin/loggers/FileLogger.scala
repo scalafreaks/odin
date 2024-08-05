@@ -28,7 +28,7 @@ import cats.syntax.all.*
 /**
   * Write to given log writer with provided formatter
   */
-final private[loggers] class FileLogger[F[_]](
+private[loggers] final class FileLogger[F[_]](
     buffer: BufferedWriter,
     formatter: Formatter,
     override val minLevel: Level

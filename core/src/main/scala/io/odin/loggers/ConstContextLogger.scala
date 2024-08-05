@@ -21,7 +21,7 @@ import io.odin.{Level, Logger, LoggerMessage}
 import cats.effect.kernel.Clock
 import cats.Monad
 
-final private[loggers] class ConstContextLogger[F[_]: Clock: Monad](ctx: Map[String, String], inner: Logger[F])
+private[loggers] final class ConstContextLogger[F[_]: Clock: Monad](ctx: Map[String, String], inner: Logger[F])
     extends DefaultLogger(inner.minLevel) {
 
   def withMinimalLevel(level: Level): Logger[F] = new ConstContextLogger(ctx, inner.withMinimalLevel(level))

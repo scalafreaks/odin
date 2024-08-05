@@ -31,7 +31,7 @@ import cats.MonadThrow
   *
   * Use `AsyncLogger.withAsync` to instantiate it safely
   */
-final private[loggers] class AsyncLogger[F[_]: Clock](
+private[loggers] final class AsyncLogger[F[_]: Clock](
     queue: Queue[F, LoggerMessage],
     inner: Logger[F]
 )(

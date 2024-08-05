@@ -33,7 +33,7 @@ import org.slf4j.helpers.SubstituteLogger
 
 class Slf4jSpec extends OdinSpec {
 
-  implicit private val ioRuntime: IORuntime = IORuntime.global
+  private implicit val ioRuntime: IORuntime = IORuntime.global
 
   it should "log with correct level" in {
     forAll { (msgs: List[LoggerMessage]) =>

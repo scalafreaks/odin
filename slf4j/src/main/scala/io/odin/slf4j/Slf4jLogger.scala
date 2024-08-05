@@ -24,7 +24,7 @@ import cats.effect.kernel.Sync
 import cats.implicits.*
 import org.slf4j.{Logger as JLogger, LoggerFactory}
 
-final private[slf4j] class Slf4jLogger[F[_]: Sync](
+private[slf4j] final class Slf4jLogger[F[_]: Sync](
     logger: JLogger,
     level: Level,
     formatter: Formatter,

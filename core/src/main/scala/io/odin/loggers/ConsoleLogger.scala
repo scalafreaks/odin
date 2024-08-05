@@ -24,7 +24,7 @@ import io.odin.formatter.Formatter
 import cats.effect.kernel.Sync
 import cats.syntax.all.*
 
-final private[loggers] class ConsoleLogger[F[_]](
+private[loggers] final class ConsoleLogger[F[_]](
     formatter: Formatter,
     out: PrintStream,
     err: PrintStream,

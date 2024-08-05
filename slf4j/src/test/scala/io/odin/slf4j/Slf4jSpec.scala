@@ -32,7 +32,7 @@ import org.slf4j.event.Level as JLevel
 import org.slf4j.event.SubstituteLoggingEvent
 import org.slf4j.helpers.SubstituteLogger
 
-@nowarn("cat=deprecation&origin=io.odin.slf4j.BufferingLogger")
+@nowarn("cat=deprecation&msg=This logger will be moved to internal library test sources")
 class Slf4jSpec extends OdinSpec {
 
   implicit private val ioRuntime: IORuntime = IORuntime.global

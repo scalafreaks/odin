@@ -25,7 +25,7 @@ import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 
-@nowarn("cat=deprecation&origin=io.odin.slf4j.BufferingLogger")
+@nowarn("cat=deprecation&msg=This logger will be moved to internal library test sources")
 class ExternalLogger extends OdinLoggerBinder[IO] {
 
   implicit val F: Sync[IO]                = IO.asyncForIO

@@ -281,6 +281,7 @@ private[odin] class MonoidLogger[F[_]: Applicative] extends Monoid[Logger[F]] {
   val empty: Logger[F] = Logger.noop
 
   def combine(x: Logger[F], y: Logger[F]): Logger[F] = new Logger[F] {
+
     val minLevel: Level = x.minLevel.min(y.minLevel)
 
     def withMinimalLevel(level: Level): Logger[F] = x.withMinimalLevel(level) |+| y.withMinimalLevel(level)
@@ -369,6 +370,7 @@ private[odin] class MonoidLogger[F[_]: Applicative] extends Monoid[Logger[F]] {
         position: Position
     ): F[Unit] =
       x.error(msg, ctx, e) *> y.error(msg, ctx, e)
+
   }
 
 }

@@ -34,21 +34,18 @@ abstract class DefaultLogger[F[_]](val minLevel: Level)(implicit clock: Clock[F]
       implicit render: Render[M],
       position: Position
   ): F[Unit] =
-    for {
-      timestamp <- clock.realTime
-      _ <- log(
-             LoggerMessage(
-               level = level,
-               message = Eval.later(render.render(msg)),
-               context = ctx,
-               exception = t,
-               position = position,
-               threadName = Thread.currentThread().getName,
-               timestamp = timestamp.toMillis
-             )
-           )
-    } yield {
-      ()
+    clock.realTime.flatMap { timestamp =>
+      log(
+        LoggerMessage(
+          level = level,
+          message = Eval.later(render.render(msg)),
+          context = ctx,
+          exception = t,
+          position = position,
+          threadName = Thread.currentThread().getName,
+          timestamp = timestamp.toMillis
+        )
+      )
     }
 
   def submit(msg: LoggerMessage): F[Unit]

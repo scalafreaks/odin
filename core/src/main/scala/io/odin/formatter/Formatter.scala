@@ -134,7 +134,6 @@ object Formatter {
     val enclosure = format match {
       case PositionFormat.Full              => position.enclosureName
       case PositionFormat.AbbreviatePackage => abbreviate(position.enclosureName)
-
     }
 
     s"$enclosure$lineNumber"
@@ -169,14 +168,14 @@ object Formatter {
     def loop(t: Throwable, builder: StringBuilder): StringBuilder = {
       builder.append("Caused by: ")
       builder.append(t.getClass.getName)
-      if (Option(t.getLocalizedMessage).isDefined) {
+      if (t.getLocalizedMessage != null) {
         builder.append(": ")
         builder.append(t.getLocalizedMessage)
       }
       builder.append(System.lineSeparator())
 
       writeStackTrace(builder, depth, filter, t.getStackTrace, indent)
-      if (Option(t.getCause).isEmpty) {
+      if (t.getCause == null) {
         builder
       } else {
         loop(t.getCause, builder)
@@ -229,15 +228,12 @@ object Formatter {
         case 1 => builder.append(input.head)
         case _ =>
           val head = input.head
-          val b    = if (head.isEmpty) builder.append(questionMark) else builder.append(head.head)
-          loop(input.tail, b.append(dot))
+          val b    = if (head.isEmpty) builder.append('?') else builder.append(head.head)
+          loop(input.tail, b.append('.'))
       }
     }
 
     loop(enclosure.split('.'), new StringBuilder).toString()
   }
-
-  private val questionMark = "?"
-  private val dot          = "."
 
 }

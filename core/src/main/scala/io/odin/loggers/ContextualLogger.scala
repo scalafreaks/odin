@@ -30,8 +30,11 @@ import cats.Monad
   * function `A => M[B]`. If there is a way to extract context `Map[String, String]` from the `A` (see [[HasContext]]),
   * then it's possible to add this context to the log.
   */
-case class ContextualLogger[F[_]: Clock: Monad](inner: Logger[F])(implicit withContext: WithContext[F])
-    extends DefaultLogger[F](inner.minLevel) {
+final private[loggers] class ContextualLogger[F[_]: Clock: Monad](inner: Logger[F])(
+    implicit withContext: WithContext[F]
+) extends DefaultLogger[F](inner.minLevel) {
+
+  def withMinimalLevel(level: Level): Logger[F] = new ContextualLogger(inner.withMinimalLevel(level))
 
   def submit(msg: LoggerMessage): F[Unit] =
     withContext.context.flatMap { ctx =>
@@ -43,13 +46,11 @@ case class ContextualLogger[F[_]: Clock: Monad](inner: Logger[F])(implicit withC
       inner.log(msgs.map(msg => msg.copy(context = msg.context ++ ctx)))
     }
 
-  def withMinimalLevel(level: Level): Logger[F] = copy(inner = inner.withMinimalLevel(level))
-
 }
 
 object ContextualLogger {
 
-  def withContext[F[_]: Clock: Monad: WithContext](inner: Logger[F]): Logger[F] = ContextualLogger(inner)
+  def withContext[F[_]: Clock: Monad: WithContext](inner: Logger[F]): Logger[F] = new ContextualLogger(inner)
 
 }
 

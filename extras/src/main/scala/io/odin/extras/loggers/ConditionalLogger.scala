@@ -27,29 +27,25 @@ import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.MonadError
 
-final case class ConditionalLogger[F[_]: Clock] private (
+final private[loggers] case class ConditionalLogger[F[_]: Clock](
     queue: Queue[F, LoggerMessage],
     inner: Logger[F],
     override val minLevel: Level
 )(implicit F: MonadError[F, Throwable])
     extends DefaultLogger[F](minLevel) {
 
-  def submit(msg: LoggerMessage): F[Unit] =
-    queue.tryOffer(msg).void
+  def withMinimalLevel(level: Level): Logger[F] = copy(inner = inner.withMinimalLevel(level), minLevel = level)
 
-  private def drain(exitCase: ExitCase): F[Unit] = {
+  def submit(msg: LoggerMessage): F[Unit] = queue.tryOffer(msg).void
+
+  private[loggers] def drain(exitCase: ExitCase): F[Unit] = {
     val level = exitCase match {
       case ExitCase.Succeeded => inner.minLevel
       case _                  => minLevel
     }
 
-    drainAll
-      .flatMap(msgs => inner.withMinimalLevel(level).log(msgs.toList))
-      .attempt
-      .void
+    drainAll.flatMap(msgs => inner.withMinimalLevel(level).log(msgs.toList)).voidError
   }
-
-  def withMinimalLevel(level: Level): Logger[F] = copy(inner = inner.withMinimalLevel(level), minLevel = level)
 
   private def drainAll: F[Vector[LoggerMessage]] =
     F.tailRecM(Vector.empty[LoggerMessage]) { acc =>
@@ -92,7 +88,7 @@ object ConditionalLogger {
     * @param maxBufferSize If `maxBufferSize` is set to some value and buffer size grows to that value,
     *                      any new events might be dropped until there is a space in the buffer.
     */
-  def create[F[_]: Async](
+  def withConditional[F[_]: Async](
       inner: Logger[F],
       minLevelOnError: Level,
       maxBufferSize: Option[Int]
@@ -103,13 +99,9 @@ object ConditionalLogger {
       case None        => Queue.unbounded[F, LoggerMessage]
     }
 
-    def acquire: F[ConditionalLogger[F]] =
-      for {
-        queue <- createQueue
-      } yield ConditionalLogger(queue, inner, minLevelOnError)
+    def acquire: F[ConditionalLogger[F]] = createQueue.map(ConditionalLogger(_, inner, minLevelOnError))
 
-    def release(logger: ConditionalLogger[F], exitCase: ExitCase): F[Unit] =
-      logger.drain(exitCase)
+    def release(logger: ConditionalLogger[F], exitCase: ExitCase): F[Unit] = logger.drain(exitCase)
 
     Resource.makeCase(acquire)(release).widen
   }

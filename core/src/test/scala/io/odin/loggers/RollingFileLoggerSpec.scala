@@ -40,8 +40,7 @@ class RollingFileLoggerSpec extends OdinSpec {
     IO.delay {
       ListDirectory(file).filter(_.isFile).foreach(_.delete())
       Files.delete(file)
-    }.attempt
-      .void
+    }.voidError
   }
 
   {

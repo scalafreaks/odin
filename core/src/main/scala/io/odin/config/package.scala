@@ -32,26 +32,15 @@ package object config extends FileNamePatternSyntax {
     * Route logs to specific logger based on the fully qualified package name.
     * Beware of O(n) complexity due to the partial matching done during the logging
     */
-  def enclosureRouting[F[_]: Clock: Monad](router: (String, Logger[F])*): DefaultBuilder[F] = {
+  def enclosureRouting[F[_]: Clock: Monad](router: (String, Logger[F])*): DefaultBuilder[F] =
     new DefaultBuilder[F](new EnclosureRouting(_, router.toList))
-  }
 
   /**
     * Route logs to specific logger based on `Class[_]` instance. Beware of O(n) complexity due to the partial matching
     * done during the logging
     */
-  def classRouting[F[_]: Clock: Monad](
-      router: (Class[?], Logger[F])*
-  ): DefaultBuilder[F] =
-    new DefaultBuilder[F](
-      new EnclosureRouting(
-        _,
-        router.toList.map {
-          case (cls, logger) =>
-            cls.getName -> logger
-        }
-      )
-    )
+  def classRouting[F[_]: Clock: Monad](router: (Class[?], Logger[F])*): DefaultBuilder[F] =
+    enclosureRouting(router.map { case (cls, logger) => cls.getName -> logger }*)
 
   /**
     * Route logs based on their level

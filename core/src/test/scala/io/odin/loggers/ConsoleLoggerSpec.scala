@@ -39,7 +39,7 @@ class ConsoleLoggerSpec extends OdinSpec {
         val errBaos = new ByteArrayOutputStream()
         val stdErr  = new PrintStream(errBaos)
 
-        val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
+        val consoleLogger = new ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
         consoleLogger.log(loggerMessage).unsafeRunSync()
         outBaos.toString() shouldBe (formatter.format(loggerMessage) + System.lineSeparator())
       }
@@ -54,7 +54,7 @@ class ConsoleLoggerSpec extends OdinSpec {
         val errBaos = new ByteArrayOutputStream()
         val stdErr  = new PrintStream(errBaos)
 
-        val consoleLogger = ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
+        val consoleLogger = new ConsoleLogger[IO](formatter, stdOut, stdErr, Level.Trace, Sync.Type.Delay)
         consoleLogger.log(loggerMessage).unsafeRunSync()
         errBaos.toString() shouldBe (formatter.format(loggerMessage) + System.lineSeparator())
       }

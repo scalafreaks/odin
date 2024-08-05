@@ -50,9 +50,8 @@ package object odin {
       formatter: Formatter = Formatter.default,
       minLevel: Level = Level.Trace,
       openOptions: Seq[OpenOption] = Seq.empty
-  ): Resource[F, Logger[F]] = {
+  ): Resource[F, Logger[F]] =
     FileLogger(fileName, formatter, minLevel, openOptions)
-  }
 
   /**
     * Create logger with safe log files allocation suspended inside of `Resource`
@@ -78,9 +77,8 @@ package object odin {
       formatter: Formatter = Formatter.default,
       minLevel: Level = Level.Trace,
       openOptions: Seq[OpenOption] = Seq.empty
-  ): Resource[F, Logger[F]] = {
+  ): Resource[F, Logger[F]] =
     RollingFileLogger(fileNamePattern, maxFileSizeInBytes, rolloverInterval, formatter, minLevel, openOptions)
-  }
 
   /**
     * Create async logger with safe log file allocation and intermediate async buffer

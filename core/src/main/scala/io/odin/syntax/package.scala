@@ -73,13 +73,13 @@ package object syntax {
       * Modify logger message before it's written to the logger
       */
     def contramap(f: LoggerMessage => LoggerMessage)(implicit clock: Clock[F], F: Monad[F]): Logger[F] =
-      ContramapLogger(f, logger)
+      ContramapLogger.withContramap(f, logger)
 
     /**
       * Filter messages given the predicate. Falsified cases are dropped from the logging
       */
     def filter(f: LoggerMessage => Boolean)(implicit clock: Clock[F], F: Monad[F]): Logger[F] =
-      FilterLogger(f, logger)
+      FilterLogger.withFilter(f, logger)
 
     /**
       * Create logger that hashes context value given that context key matches one of the arguments
@@ -128,13 +128,13 @@ package object syntax {
       * Intercept logger message before it's written to the logger
       */
     def contramap(f: LoggerMessage => LoggerMessage)(implicit clock: Clock[F], F: Monad[F]): Resource[F, Logger[F]] =
-      resource.map(ContramapLogger(f, _))
+      resource.map(ContramapLogger.withContramap(f, _))
 
     /**
       * Filter messages given the predicate. Falsified cases are dropped from the logging
       */
     def filter(f: LoggerMessage => Boolean)(implicit clock: Clock[F], F: Monad[F]): Resource[F, Logger[F]] =
-      resource.map(FilterLogger(f, _))
+      resource.map(FilterLogger.withFilter(f, _))
 
     /**
       * Create logger that hashes context value given that context key matches one of the arguments

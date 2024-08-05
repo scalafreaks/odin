@@ -36,7 +36,7 @@ package object syntax {
         minLevelOnError: Level,
         maxBufferSize: Option[Int] = None
     )(use: Logger[F] => F[A])(implicit F: Async[F]): F[A] =
-      ConditionalLogger.create[F](logger, minLevelOnError, maxBufferSize).use(use)
+      ConditionalLogger.withConditional[F](logger, minLevelOnError, maxBufferSize).use(use)
 
   }
 

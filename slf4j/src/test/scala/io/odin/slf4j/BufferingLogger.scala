@@ -28,8 +28,8 @@ case class BufferingLogger[F[_]](override val minLevel: Level)(implicit F: Sync[
 
   val buffer: Ref[F, Queue[LoggerMessage]] = Ref.unsafe[F, Queue[LoggerMessage]](Queue.empty)
 
-  def submit(msg: LoggerMessage): F[Unit] = buffer.update(_.enqueue(msg))
-
   def withMinimalLevel(level: Level): Logger[F] = copy(minLevel = level)
+
+  def submit(msg: LoggerMessage): F[Unit] = buffer.update(_.enqueue(msg))
 
 }

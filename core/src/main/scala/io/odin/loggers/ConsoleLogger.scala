@@ -24,7 +24,7 @@ import io.odin.formatter.Formatter
 import cats.effect.kernel.Sync
 import cats.syntax.all.*
 
-case class ConsoleLogger[F[_]](
+final private[loggers] class ConsoleLogger[F[_]](
     formatter: Formatter,
     out: PrintStream,
     err: PrintStream,
@@ -33,8 +33,7 @@ case class ConsoleLogger[F[_]](
 )(implicit F: Sync[F])
     extends DefaultLogger[F](minLevel) {
 
-  private def println(out: PrintStream, msg: LoggerMessage, formatter: Formatter): F[Unit] =
-    F.suspend(syncType)(out.println(formatter.format(msg)))
+  def withMinimalLevel(level: Level): Logger[F] = new ConsoleLogger(formatter, out, err, level, syncType)
 
   def submit(msg: LoggerMessage): F[Unit] =
     if (msg.level < Level.Warn) {
@@ -43,13 +42,14 @@ case class ConsoleLogger[F[_]](
       println(err, msg, formatter)
     }
 
-  def withMinimalLevel(level: Level): Logger[F] = copy(minLevel = level)
+  private def println(out: PrintStream, msg: LoggerMessage, formatter: Formatter): F[Unit] =
+    F.suspend(syncType)(out.println(formatter.format(msg)))
 
 }
 
 object ConsoleLogger {
 
   def apply[F[_]: Sync](formatter: Formatter, minLevel: Level, syncType: Sync.Type = Sync.Type.Blocking): Logger[F] =
-    ConsoleLogger(formatter, scala.Console.out, scala.Console.err, minLevel, syncType)
+    new ConsoleLogger(formatter, scala.Console.out, scala.Console.err, minLevel, syncType)
 
 }

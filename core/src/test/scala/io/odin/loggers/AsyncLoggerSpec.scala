@@ -61,7 +61,7 @@ class AsyncLoggerSpec extends OdinSpec {
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
         queue    <- Queue.unbounded[IO, LoggerMessage]
-        logger    = AsyncLogger(queue, 1.millis, Logger.noop[IO]).withMinimalLevel(Level.Trace)
+        logger    = new AsyncLogger(queue, Logger.noop[IO]).withMinimalLevel(Level.Trace)
         _        <- msgs.traverse(logger.log)
         reported <- List.fill(msgs.length)(queue.take).sequence
       } yield {
@@ -79,7 +79,7 @@ class AsyncLoggerSpec extends OdinSpec {
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
         queue  <- Queue.unbounded[IO, LoggerMessage]
-        logger  = AsyncLogger(queue, 1.millis, errorLogger)
+        logger  = new AsyncLogger(queue, errorLogger)
         _      <- logger.log(msgs)
         result <- logger.drain
       } yield {

@@ -25,13 +25,13 @@ import cats.Monad
 /**
   * Pure logger that stores logs in `WriterT` log
   */
-class WriterTLogger[F[_]: Clock: Monad](override val minLevel: Level = Level.Trace)
+final class WriterTLogger[F[_]: Clock: Monad](override val minLevel: Level = Level.Trace)
     extends DefaultLogger[WriterT[F, List[LoggerMessage], *]](minLevel) {
+
+  def withMinimalLevel(level: Level): Logger[WriterT[F, List[LoggerMessage], *]] = new WriterTLogger[F](level)
 
   def submit(msg: LoggerMessage): WriterT[F, List[LoggerMessage], Unit] = WriterT.tell(List(msg))
 
   override def submit(msgs: List[LoggerMessage]): WriterT[F, List[LoggerMessage], Unit] = WriterT.tell(msgs)
-
-  def withMinimalLevel(level: Level): Logger[WriterT[F, List[LoggerMessage], *]] = new WriterTLogger[F](level)
 
 }

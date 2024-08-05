@@ -28,24 +28,28 @@ import cats.syntax.all.*
 /**
   * Write to given log writer with provided formatter
   */
-case class FileLogger[F[_]](buffer: BufferedWriter, formatter: Formatter, override val minLevel: Level)(
+final private[loggers] class FileLogger[F[_]](
+    buffer: BufferedWriter,
+    formatter: Formatter,
+    override val minLevel: Level
+)(
     implicit F: Sync[F]
 ) extends DefaultLogger[F](minLevel) {
+
+  def withMinimalLevel(level: Level): Logger[F] = new FileLogger(buffer, formatter, level)
 
   def submit(msg: LoggerMessage): F[Unit] =
     F.guarantee(write(msg, formatter), flush)
 
   override def submit(msgs: List[LoggerMessage]): F[Unit] =
-    F.guarantee(msgs.traverse(write(_, formatter)).void, flush)
+    F.guarantee(msgs.traverse_(write(_, formatter)), flush)
 
   private def write(msg: LoggerMessage, formatter: Formatter): F[Unit] =
     F.blocking {
       buffer.write(formatter.format(msg) + System.lineSeparator())
     }
 
-  private def flush: F[Unit] = F.delay(buffer.flush()).handleErrorWith(_ => F.unit)
-
-  def withMinimalLevel(level: Level): Logger[F] = copy(minLevel = level)
+  private def flush: F[Unit] = F.delay(buffer.flush()).voidError
 
 }
 
@@ -59,15 +63,15 @@ object FileLogger {
   )(
       implicit F: Sync[F]
   ): Resource[F, Logger[F]] = {
-    def mkDirs: F[Unit] = F.delay {
-      Option(Paths.get(fileName).getParent).foreach(_.toFile.mkdirs())
-    }
+
+    def mkDirs: F[Unit] = F.delay(Option(Paths.get(fileName).getParent).foreach(_.toFile.mkdirs()))
+
     def mkBuffer: F[BufferedWriter] = F.blocking(Files.newBufferedWriter(Paths.get(fileName), openOptions*))
-    def closeBuffer(buffer: BufferedWriter): F[Unit] =
-      F.blocking(buffer.close()).handleErrorWith(_ => F.unit)
+
+    def closeBuffer(buffer: BufferedWriter): F[Unit] = F.blocking(buffer.close()).voidError
 
     Resource.make(mkDirs >> mkBuffer)(closeBuffer).map { buffer =>
-      FileLogger(buffer, formatter, minLevel)
+      new FileLogger(buffer, formatter, minLevel)
     }
   }
 

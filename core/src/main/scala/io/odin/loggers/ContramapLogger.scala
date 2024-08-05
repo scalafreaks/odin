@@ -24,13 +24,22 @@ import cats.Monad
 /**
   * Apply given function to each `LoggerMessage` before passing it to the next logger
   */
-case class ContramapLogger[F[_]: Clock: Monad](f: LoggerMessage => LoggerMessage, inner: Logger[F])
-    extends DefaultLogger[F](inner.minLevel) {
+final private[loggers] class ContramapLogger[F[_]: Clock: Monad](
+    fn: LoggerMessage => LoggerMessage,
+    inner: Logger[F]
+) extends DefaultLogger[F](inner.minLevel) {
 
-  def submit(msg: LoggerMessage): F[Unit] = inner.log(f(msg))
+  def withMinimalLevel(level: Level): Logger[F] = new ContramapLogger(fn, inner.withMinimalLevel(level))
 
-  override def submit(msgs: List[LoggerMessage]): F[Unit] = inner.log(msgs.map(f))
+  def submit(msg: LoggerMessage): F[Unit] = inner.log(fn(msg))
 
-  def withMinimalLevel(level: Level): Logger[F] = copy(inner = inner.withMinimalLevel(level))
+  override def submit(msgs: List[LoggerMessage]): F[Unit] = inner.log(msgs.map(fn))
+
+}
+
+object ContramapLogger {
+
+  def withContramap[F[_]: Clock: Monad](fn: LoggerMessage => LoggerMessage, inner: Logger[F]): Logger[F] =
+    new ContramapLogger(fn, inner)
 
 }

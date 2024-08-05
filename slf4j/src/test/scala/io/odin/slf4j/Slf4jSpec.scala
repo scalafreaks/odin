@@ -186,7 +186,7 @@ class Slf4jSpec extends OdinSpec {
     val errorSlf4JLogger                  = Slf4jLogger[IO](subLogger, Level.Error)
     val noErrorLogGen: Gen[LoggerMessage] = loggerMessageGen.filter(_.level < Level.Error)
     forAll(noErrorLogGen) { msg =>
-      errorSlf4JLogger.submit(msg).unsafeRunSync()
+      errorSlf4JLogger.log(msg).unsafeRunSync()
       logQueue.isEmpty shouldBe true
     }
   }

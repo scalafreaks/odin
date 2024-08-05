@@ -58,23 +58,23 @@ object RollingFileLogger {
         } yield FileLogger[F](fileNamePattern(localTime), formatter, minLevel, openOptions)
       }
 
-    Resource.pure[F, Boolean](maxFileSizeInBytes.isDefined || rolloverInterval.isDefined).ifM(rollingLogger, fileLogger)
+    if (maxFileSizeInBytes.isDefined || rolloverInterval.isDefined) rollingLogger else fileLogger
   }
 
-  private[odin] case class RefLogger[F[_]: Clock: Monad](
+  final private[odin] class RefLogger[F[_]: Clock: Monad](
       current: Ref[F, Logger[F]],
       override val minLevel: Level
   ) extends DefaultLogger[F](minLevel) {
+
+    def withMinimalLevel(level: Level): Logger[F] = new RefLogger(current, level)
 
     def submit(msg: LoggerMessage): F[Unit] = current.get.flatMap(_.log(msg))
 
     override def submit(msgs: List[LoggerMessage]): F[Unit] = current.get.flatMap(_.log(msgs))
 
-    def withMinimalLevel(level: Level): Logger[F] = copy(minLevel = level)
-
   }
 
-  private[odin] class RollingFileLoggerFactory[F[_]](
+  final private[odin] class RollingFileLoggerFactory[F[_]](
       fileNamePattern: LocalDateTime => String,
       maxFileSizeInBytes: Option[Long],
       rolloverInterval: Option[FiniteDuration],
@@ -93,7 +93,7 @@ object RollingFileLogger {
         (hs, (logger, rolloverSignal)) = hotswap
         refLogger                     <- Resource.eval(Ref.of(logger))
         _                             <- F.background(rollingLoop(hs, rolloverSignal, refLogger))
-      } yield RefLogger(refLogger, minLevel)
+      } yield new RefLogger(refLogger, minLevel)
 
     private def now: F[Long] = F.realTime.map(_.toMillis)
 
@@ -140,10 +140,7 @@ object RollingFileLogger {
             }
           time <- now
           _ <- F.unlessA(checkConditions(start, time, size)) {
-                 for {
-                   _ <- F.sleep(100.millis)
-                   _ <- loop(start)
-                 } yield ()
+                 F.delayBy(loop(start), 100.millis)
                }
         } yield ()
       }
@@ -176,8 +173,6 @@ object RollingFileLogger {
   }
 
   private def localDateTimeNow[F[_]: Functor](implicit clock: Clock[F]): F[LocalDateTime] =
-    for {
-      time <- clock.realTimeInstant
-    } yield LocalDateTime.ofInstant(time, TimeZone.getDefault.toZoneId)
+    clock.realTimeInstant.map(LocalDateTime.ofInstant(_, TimeZone.getDefault.toZoneId))
 
 }

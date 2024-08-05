@@ -26,7 +26,7 @@ import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import cats.Monad
 
-private[config] class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router: List[(String, Logger[F])])(
+final private[config] class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router: List[(String, Logger[F])])(
     implicit F: Monad[F]
 ) extends DefaultLogger(Level.Trace) {
 
@@ -35,11 +35,17 @@ private[config] class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router:
       (packageName, (idx, logger))
   }
 
+  def withMinimalLevel(level: Level): Logger[F] =
+    new EnclosureRouting[F](
+      fallback.withMinimalLevel(level),
+      router.map { case (route, logger) => route -> logger.withMinimalLevel(level) }
+    )
+
   def submit(msg: LoggerMessage): F[Unit] = recLog(indexedRouter, msg)
 
   override def submit(msgs: List[LoggerMessage]): F[Unit] = {
-    val grouped: Iterable[((Int, Logger[F]), List[LoggerMessage])] = msgs
-      .foldLeft(Map.empty[(Int, Logger[F]), List[LoggerMessage]]) {
+    val grouped: Iterable[((Int, Logger[F]), List[LoggerMessage])] =
+      msgs.foldLeft(Map.empty[(Int, Logger[F]), List[LoggerMessage]]) {
         case (map, msg) =>
           val kv = indexedRouter
             .collectFirst {
@@ -65,14 +71,5 @@ private[config] class EnclosureRouting[F[_]: Clock](fallback: Logger[F], router:
       F.whenA(msg.level >= logger.minLevel)(logger.log(msg))
     case _ :: tail => recLog(tail, msg)
   }
-
-  def withMinimalLevel(level: Level): Logger[F] =
-    new EnclosureRouting[F](
-      fallback.withMinimalLevel(level),
-      router.map {
-        case (route, logger) =>
-          route -> logger.withMinimalLevel(level)
-      }
-    )
 
 }

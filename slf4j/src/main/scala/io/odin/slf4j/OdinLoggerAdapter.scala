@@ -36,27 +36,26 @@ case class OdinLoggerAdapter[F[_]](loggerName: String, underlying: OdinLogger[F]
   override def getName: String = loggerName
 
   private def run(level: Level, msg: String, t: Option[Throwable] = None): Unit =
-    dispatcher.unsafeRunSync(for {
-      timestamp <- F.realTime
-      _ <- underlying.log(
-             LoggerMessage(
-               level = level,
-               message = Eval.now(msg),
-               context = Map.empty,
-               exception = t,
-               position = Position(
-                 fileName = loggerName,
-                 enclosureName = loggerName,
-                 packageName = loggerName,
-                 line = -1
-               ),
-               threadName = Thread.currentThread().getName,
-               timestamp = timestamp.toMillis
-             )
-           )
-    } yield {
-      ()
-    })
+    dispatcher.unsafeRunSync {
+      F.realTime.flatMap { timestamp =>
+        underlying.log(
+          LoggerMessage(
+            level = level,
+            message = Eval.now(msg),
+            context = Map.empty,
+            exception = t,
+            position = Position(
+              fileName = loggerName,
+              enclosureName = loggerName,
+              packageName = loggerName,
+              line = -1
+            ),
+            threadName = Thread.currentThread().getName,
+            timestamp = timestamp.toMillis
+          )
+        )
+      }
+    }
 
   private[slf4j] def runFormatted(level: Level, tuple: FormattingTuple): Unit =
     run(level, tuple.getMessage, Option(tuple.getThrowable))

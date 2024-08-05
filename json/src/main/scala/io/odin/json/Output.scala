@@ -45,8 +45,7 @@ object Output {
 
   }
 
-  implicit private[json] val codec: JsonValueCodec[Output] = JsonCodecMaker.make(
-    CodecMakerConfig.withFieldNameMapper(JsonCodecMaker.enforce_snake_case)
-  )
+  implicit private[json] val codec: JsonValueCodec[Output] =
+    JsonCodecMaker.make(CodecMakerConfig.withFieldNameMapper(JsonCodecMaker.enforce_snake_case))
 
 }

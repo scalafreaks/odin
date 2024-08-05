@@ -18,7 +18,7 @@ ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
-ThisBuild / githubWorkflowAddedJobs := {
+ThisBuild / githubWorkflowAddedJobs += {
   val jobSetup = (ThisBuild / githubWorkflowJobSetup).value.toList
   val coverageAggregate =
     WorkflowStep.Sbt(
@@ -36,14 +36,12 @@ ThisBuild / githubWorkflowAddedJobs := {
         "codecov_yml_path" -> "./.codecov.yml"
       )
     )
-  val codecovJob =
-    WorkflowJob(
-      "codecov",
-      "Codecov Publish",
-      jobSetup :+ coverageAggregate :+ codecovPublish,
-      cond = Some("github.event_name != 'push'")
-    )
-  (ThisBuild / githubWorkflowAddedJobs).value :+ codecovJob
+  WorkflowJob(
+    "codecov",
+    "Codecov Publish",
+    jobSetup :+ coverageAggregate :+ codecovPublish,
+    cond = Some("github.event_name != 'push'")
+  )
 }
 
 ThisBuild / githubWorkflowPublishPostamble := Seq(

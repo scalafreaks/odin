@@ -30,21 +30,21 @@ import cats.MonadError
 private[loggers] final case class ConditionalLogger[F[_]: Clock](
     queue: Queue[F, LoggerMessage],
     inner: Logger[F],
-    override val minLevel: Level
+    minLevelOnError: Level
 )(implicit F: MonadError[F, Throwable])
-    extends DefaultLogger[F](minLevel) {
+    extends DefaultLogger[F](minLevelOnError) {
 
-  def withMinimalLevel(level: Level): Logger[F] = copy(inner = inner.withMinimalLevel(level), minLevel = level)
+  def withMinimalLevel(level: Level): Logger[F] = copy(inner = inner.withMinimalLevel(level), minLevelOnError = level)
 
   def submit(msg: LoggerMessage): F[Unit] = queue.tryOffer(msg).void
 
   private[loggers] def drain(exitCase: ExitCase): F[Unit] = {
-    val level = exitCase match {
-      case ExitCase.Succeeded => inner.minLevel
-      case _                  => minLevel
+    val logger = exitCase match {
+      case ExitCase.Succeeded => inner
+      case _                  => inner.withMinimalLevel(minLevelOnError)
     }
 
-    drainAll.flatMap(msgs => inner.withMinimalLevel(level).log(msgs.toList)).voidError
+    drainAll.flatMap(msgs => logger.log(msgs.toList)).voidError
   }
 
   private def drainAll: F[Vector[LoggerMessage]] =
@@ -61,20 +61,20 @@ object ConditionalLogger {
 
   /**
     * Create ConditionalLogger that buffers messages and sends them to the inner logger when the resource is released.
-    * If evaluation of the bracket completed with an error, the `fallbackLevel` is used as a `minLevel`.
+    * If evaluation of the bracket completed with an error, the `minLevelOnError` is used as a `minLevel`.
     *
-    * Example:
+    * @example
     * {{{
-    *   consoleLogger[F](minLevel = Level.Info).withErrorLevel(Level.Debug) { logger =>
-    *     logger.debug("debug message") >> trickyCode
-    *   }
+    * consoleLogger[F](minLevel = Level.Info).withErrorLevel(Level.Debug) { logger =>
+    *   logger.debug("debug message") >> trickyCode
+    * }
     * }}}
     *
     * If evaluation completed with an error, the messages with `level >= Level.Debug` will be sent to an inner logger.
     * If evaluation completed successfully, the messages with `level >= Level.Info` will be sent to an inner logger.
     *
     * '''Important:''' nothing is logged until the resource is released.
-    * Example:
+    * @example
     * {{{
     * consoleLogger[F](minLevel = Level.Info).withErrorLevel(Level.Debug) { logger =>
     *   logger.info("info log") >> Timer[F].sleep(10.seconds) >> logger.debug("debug log")

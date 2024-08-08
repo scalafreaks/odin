@@ -93,6 +93,8 @@ lazy val versions = new {
 
   val slf4j = "1.7.36"
 
+  val slf4j1 = "1.7.36"
+
   val sourcecode = "0.4.2"
 
   val zio = "1.0.18"
@@ -125,7 +127,8 @@ lazy val magnoliaScala3 = "com.softwaremill.magnolia1_3" %% "magnolia" % version
 
 lazy val perfolation = "com.outr" %% "perfolation" % versions.perfolation
 
-lazy val slf4j = "org.slf4j" % "slf4j-api" % versions.slf4j
+lazy val slf4j  = "org.slf4j" % "slf4j-api" % versions.slf4j
+lazy val slf4j1 = "org.slf4j" % "slf4j-api" % versions.slf4j1
 
 lazy val log4j = ("com.lmax" % "disruptor" % versions.disruptor) :: List(
   "org.apache.logging.log4j" % "log4j-api",
@@ -177,6 +180,13 @@ lazy val `odin-slf4j` = (project in file("slf4j"))
   )
   .dependsOn(`odin-core` % "compile->compile;test->test")
 
+lazy val `odin-slf4j1-provider` = (project in file("slf4j1-provider"))
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies += slf4j1
+  )
+  .dependsOn(`odin-core` % "compile->compile;test->test")
+
 lazy val `odin-extras` = (project in file("extras"))
   .settings(sharedSettings)
   .settings(
@@ -222,4 +232,13 @@ lazy val examples = (project in file("examples"))
   )
 
 lazy val odin =
-  tlCrossRootProject.aggregate(`odin-core`, `odin-json`, `odin-zio`, `odin-slf4j`, `odin-extras`, benchmarks, examples)
+  tlCrossRootProject.aggregate(
+    `odin-core`,
+    `odin-json`,
+    `odin-zio`,
+    `odin-slf4j`,
+    `odin-slf4j1-provider`,
+    `odin-extras`,
+    benchmarks,
+    examples
+  )

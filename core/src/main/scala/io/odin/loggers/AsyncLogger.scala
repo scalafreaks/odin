@@ -32,7 +32,7 @@ import cats.MonadThrow
   * Use `AsyncLogger.withAsync` to instantiate it safely
   */
 private[loggers] final class AsyncLogger[F[_]: Clock](
-    queue: Queue[F, LoggerMessage],
+    queue: Queue[F, F[Unit]],
     inner: Logger[F]
 )(
     implicit F: MonadThrow[F]
@@ -40,12 +40,12 @@ private[loggers] final class AsyncLogger[F[_]: Clock](
 
   def withMinimalLevel(level: Level): Logger[F] = new AsyncLogger(queue, inner.withMinimalLevel(level))
 
-  def submit(msg: LoggerMessage): F[Unit] = queue.tryOffer(msg).void
+  def submit(msg: LoggerMessage): F[Unit] = queue.tryOffer(inner.log(msg)).void
 
-  private[loggers] def drain: F[Unit] = drainAll.flatMap(msgs => inner.log(msgs.toList)).voidError
+  private[loggers] def drain: F[Unit] = drainAll.flatMap(logActions => logActions.sequence_).voidError
 
-  private def drainAll: F[Vector[LoggerMessage]] =
-    F.tailRecM(Vector.empty[LoggerMessage]) { acc =>
+  private def drainAll: F[Vector[F[Unit]]] =
+    F.tailRecM(Vector.empty[F[Unit]]) { acc =>
       queue.tryTake.map {
         case Some(value) => Left(acc :+ value)
         case None        => Right(acc)
@@ -75,23 +75,23 @@ object AsyncLogger {
 
     val createQueue = maxBufferSize match {
       case Some(value) =>
-        Queue.bounded[F, LoggerMessage](value)
+        Queue.bounded[F, F[Unit]](value)
       case None =>
-        Queue.unbounded[F, LoggerMessage]
+        Queue.unbounded[F, F[Unit]]
     }
 
     // Run internal loop of consuming events from the queue and push them down the chain
     def backgroundConsumer(logger: AsyncLogger[F]): Resource[F, Unit] = {
 
-      def drainLoop: F[Unit] = F.andWait(logger.drain, timeWindow).foreverM
+      def drainLoop: F[Unit] = F.delayBy(logger.drain, timeWindow).foreverM
 
-      Resource.make(F.start(drainLoop))(fiber => logger.drain >> fiber.cancel).void
+      F.background(drainLoop).onFinalize(logger.drain).void
     }
 
     for {
-      queue  <- Resource.eval(createQueue)
-      logger <- Resource.pure(new AsyncLogger(queue, inner))
-      _      <- backgroundConsumer(logger)
+      queue <- Resource.eval(createQueue)
+      logger = new AsyncLogger(queue, inner)
+      _     <- backgroundConsumer(logger)
     } yield logger
   }
 

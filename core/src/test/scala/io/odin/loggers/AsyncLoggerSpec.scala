@@ -23,6 +23,7 @@ import io.odin.syntax.*
 
 import cats.effect.{IO, Ref, Resource}
 import cats.effect.std.Queue
+import cats.effect.testkit.*
 import cats.effect.unsafe.IORuntime
 import cats.syntax.all.*
 
@@ -33,39 +34,49 @@ class AsyncLoggerSpec extends OdinSpec {
   case class RefLogger(ref: Ref[IO, List[LoggerMessage]], override val minLevel: Level = Level.Trace)
       extends DefaultLogger[IO](minLevel) {
 
-    def submit(msg: LoggerMessage): IO[Unit] = IO.raiseError(new IllegalStateException("Async should always batch"))
+    def submit(msg: LoggerMessage): IO[Unit] = ref.update(_ :+ msg)
 
-    override def submit(msgs: List[LoggerMessage]): IO[Unit] = {
-      ref.update(_ ::: msgs)
-    }
+    override def submit(msgs: List[LoggerMessage]): IO[Unit] = ref.update(_ ::: msgs)
 
     def withMinimalLevel(level: Level): Logger[IO] = copy(minLevel = level)
 
   }
 
-  ignore should "push logs down the chain" in {
+  it should "push logs down the chain" in {
     forAll { (msgs: List[LoggerMessage]) =>
-      (for {
-        ref      <- Resource.eval(Ref.of[IO, List[LoggerMessage]](List.empty))
-        logger   <- RefLogger(ref).withMinimalLevel(Level.Trace).withAsync()
-        _        <- Resource.eval(msgs.traverse(logger.log))
-        _        <- Resource.eval(IO.sleep(10.millis))
-        reported <- Resource.eval(ref.get)
-      } yield {
-        reported shouldBe msgs
-      }).use(IO(_)).unsafeRunSync()
+      TestControl
+        .executeEmbed {
+          (for {
+            ref    <- Resource.eval(IO.ref(List.empty[LoggerMessage]))
+            logger <- RefLogger(ref).withAsync()
+            _      <- Resource.eval(msgs.traverse(logger.log))
+            before <- Resource.eval(ref.get)
+            _      <- Resource.eval(IO.sleep(2.millis))
+            after  <- Resource.eval(ref.get)
+          } yield {
+            before shouldBe empty
+            after shouldBe msgs
+          }).use(IO(_))
+        }
+        .unsafeRunSync()
     }
   }
 
-  it should "push logs to the queue" in {
+  it should "push log operations to the queue" in {
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
-        queue    <- Queue.unbounded[IO, LoggerMessage]
-        logger    = new AsyncLogger(queue, Logger.noop[IO]).withMinimalLevel(Level.Trace)
+        queue    <- Queue.unbounded[IO, IO[Unit]]
+        ref      <- IO.ref(List.empty[LoggerMessage])
+        logger    = new AsyncLogger(queue, RefLogger(ref).withMinimalLevel(Level.Trace)).withMinimalLevel(Level.Trace)
         _        <- msgs.traverse(logger.log)
-        reported <- List.fill(msgs.length)(queue.take).sequence
+        enqueued <- List.fill(msgs.length)(queue.take).sequence
+        reportedBefore <- ref.get
+        _              <- enqueued.sequence_
+        reportedAfter  <- ref.get
       } yield {
-        reported shouldBe msgs
+        enqueued should have length msgs.length.toLong
+        reportedBefore shouldBe empty
+        reportedAfter shouldBe msgs
       }).unsafeRunSync()
     }
   }
@@ -78,13 +89,38 @@ class AsyncLoggerSpec extends OdinSpec {
     }
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
-        queue  <- Queue.unbounded[IO, LoggerMessage]
+        queue  <- Queue.unbounded[IO, IO[Unit]]
         logger  = new AsyncLogger(queue, errorLogger)
         _      <- logger.log(msgs)
         result <- logger.drain
       } yield {
-        result shouldBe (())
+        result shouldBe ()
       }).unsafeRunSync()
+    }
+  }
+
+  it should "respect updated minimal level" in {
+    forAll { (msgs: List[LoggerMessage]) =>
+      TestControl
+        .executeEmbed {
+          for {
+            infoMessages <- IO.pure(msgs.filter(_.level >= Level.Info))
+            ref          <- IO.ref(List.empty[LoggerMessage])
+            _ <- RefLogger(ref, Level.Info).withAsync().use { logger =>
+                   val traceLogger = logger.withMinimalLevel(Level.Trace)
+                   for {
+                     _ <- msgs.traverse(logger.log)      // only Info, Warn, Error messages should be logged
+                     _ <- msgs.traverse(traceLogger.log) // all messages should be logged
+                   } yield ()
+                 }
+            reported <- ref.get // TestControl ensures periodic flush is not run, only resource close flush
+          } yield {
+            val (infos, all) = reported.splitAt(infoMessages.size)
+            infos shouldBe infoMessages
+            all shouldBe msgs
+          }
+        }
+        .unsafeRunSync()
     }
   }
 

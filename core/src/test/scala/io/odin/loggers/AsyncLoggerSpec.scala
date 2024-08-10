@@ -33,7 +33,7 @@ class AsyncLoggerSpec extends OdinSpec {
   case class RefLogger(ref: Ref[IO, List[LoggerMessage]], override val minLevel: Level = Level.Trace)
       extends DefaultLogger[IO](minLevel) {
 
-    def submit(msg: LoggerMessage): IO[Unit] = ref.update(_ :+ msg)
+    def submit(msg: LoggerMessage): IO[Unit] = IO.raiseError(new IllegalStateException("Async should always batch"))
 
     override def submit(msgs: List[LoggerMessage]): IO[Unit] = ref.update(_ ::: msgs)
 

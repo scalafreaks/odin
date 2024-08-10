@@ -204,10 +204,10 @@ lazy val `odin-extras` = (project in file("extras"))
   .dependsOn(`odin-core` % "compile->compile;test->test")
 
 lazy val benchmarks = (project in file("benchmarks"))
-  .enablePlugins(NoPublishPlugin)
+  .enablePlugins(JmhPlugin, NoPublishPlugin)
   .settings(sharedSettings)
-  .enablePlugins(JmhPlugin)
   .settings(
+    javacOptions         -= "-Xlint:all",
     libraryDependencies ++= catsEffect :: scribe ::: log4j
   )
   .dependsOn(`odin-core`, `odin-json`)

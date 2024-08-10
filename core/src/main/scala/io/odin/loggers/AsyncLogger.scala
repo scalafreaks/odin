@@ -20,9 +20,8 @@ import scala.concurrent.duration.*
 
 import io.odin.{Level, Logger, LoggerMessage}
 
-import cats.effect.kernel.{Async, Clock, Resource}
+import cats.effect.kernel.{Async, Clock, Ref, Resource}
 import cats.effect.std.Dispatcher
-import cats.effect.std.Queue
 import cats.syntax.all.*
 import cats.MonadThrow
 
@@ -32,25 +31,26 @@ import cats.MonadThrow
   * Use `AsyncLogger.withAsync` to instantiate it safely
   */
 private[loggers] final class AsyncLogger[F[_]: Clock](
-    queue: Queue[F, F[Unit]],
+    buffers: Ref[F, Map[Logger[F], Vector[LoggerMessage]]],
+    maxBufferSize: Int,
     inner: Logger[F]
 )(
     implicit F: MonadThrow[F]
 ) extends DefaultLogger[F](inner.minLevel) {
 
-  def withMinimalLevel(level: Level): Logger[F] = new AsyncLogger(queue, inner.withMinimalLevel(level))
+  def withMinimalLevel(level: Level): Logger[F] = new AsyncLogger(buffers, maxBufferSize, inner.withMinimalLevel(level))
 
-  def submit(msg: LoggerMessage): F[Unit] = queue.tryOffer(inner.log(msg)).void
-
-  private[loggers] def drain: F[Unit] = drainAll.flatMap(logActions => logActions.sequence_).voidError
-
-  private def drainAll: F[Vector[F[Unit]]] =
-    F.tailRecM(Vector.empty[F[Unit]]) { acc =>
-      queue.tryTake.map {
-        case Some(value) => Left(acc :+ value)
-        case None        => Right(acc)
-      }
+  def submit(msg: LoggerMessage): F[Unit] = buffers.update { buffers =>
+    buffers.updatedWith(inner) {
+      case Some(msgs) if msgs.length < maxBufferSize => Some(msgs :+ msg)
+      case None                                      => Some(Vector(msg))
+      case other                                     => other // Exhausted buffer, messages are discarded
     }
+  }
+
+  def drain: F[Unit] = buffers.getAndSet(Map.empty).flatMap { buffers =>
+    buffers.toList.traverse_ { case (logger, msgs) => logger.log(msgs.toList).voidError }
+  }
 
 }
 
@@ -73,13 +73,6 @@ object AsyncLogger {
       implicit F: Async[F]
   ): Resource[F, Logger[F]] = {
 
-    val createQueue = maxBufferSize match {
-      case Some(value) =>
-        Queue.bounded[F, F[Unit]](value)
-      case None =>
-        Queue.unbounded[F, F[Unit]]
-    }
-
     // Run internal loop of consuming events from the queue and push them down the chain
     def backgroundConsumer(logger: AsyncLogger[F]): Resource[F, Unit] = {
 
@@ -89,9 +82,9 @@ object AsyncLogger {
     }
 
     for {
-      queue <- Resource.eval(createQueue)
-      logger = new AsyncLogger(queue, inner)
-      _     <- backgroundConsumer(logger)
+      buffers <- Resource.eval(Ref[F].of(Map.empty[Logger[F], Vector[LoggerMessage]]))
+      logger   = new AsyncLogger(buffers, maxBufferSize.getOrElse(Int.MaxValue), inner)
+      _       <- backgroundConsumer(logger)
     } yield logger
   }
 

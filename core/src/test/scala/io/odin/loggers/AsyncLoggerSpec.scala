@@ -22,7 +22,6 @@ import io.odin.{Level, Logger, LoggerMessage, OdinSpec}
 import io.odin.syntax.*
 
 import cats.effect.{IO, Ref, Resource}
-import cats.effect.std.Queue
 import cats.effect.testkit.*
 import cats.effect.unsafe.IORuntime
 import cats.syntax.all.*
@@ -62,21 +61,17 @@ class AsyncLoggerSpec extends OdinSpec {
     }
   }
 
-  it should "push log operations to the queue" in {
+  it should "push logs to the buffer" in {
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
-        queue    <- Queue.unbounded[IO, IO[Unit]]
-        ref      <- IO.ref(List.empty[LoggerMessage])
-        logger    = new AsyncLogger(queue, RefLogger(ref).withMinimalLevel(Level.Trace)).withMinimalLevel(Level.Trace)
+        buffers <- IO.ref(Map.empty[Logger[IO], Vector[LoggerMessage]])
+        ref     <- IO.ref(List.empty[LoggerMessage])
+        logger = new AsyncLogger(buffers, Int.MaxValue, RefLogger(ref).withMinimalLevel(Level.Trace))
+                   .withMinimalLevel(Level.Trace)
         _        <- msgs.traverse(logger.log)
-        enqueued <- List.fill(msgs.length)(queue.take).sequence
-        reportedBefore <- ref.get
-        _              <- enqueued.sequence_
-        reportedAfter  <- ref.get
+        reported <- buffers.get.map(_.values.flatten.toList)
       } yield {
-        enqueued should have length msgs.length.toLong
-        reportedBefore shouldBe empty
-        reportedAfter shouldBe msgs
+        reported shouldBe msgs
       }).unsafeRunSync()
     }
   }
@@ -89,10 +84,10 @@ class AsyncLoggerSpec extends OdinSpec {
     }
     forAll { (msgs: List[LoggerMessage]) =>
       (for {
-        queue  <- Queue.unbounded[IO, IO[Unit]]
-        logger  = new AsyncLogger(queue, errorLogger)
-        _      <- logger.log(msgs)
-        result <- logger.drain
+        buffers <- IO.ref(Map.empty[Logger[IO], Vector[LoggerMessage]])
+        logger   = new AsyncLogger(buffers, Int.MaxValue, errorLogger)
+        _       <- logger.log(msgs)
+        result  <- logger.drain
       } yield {
         result shouldBe ()
       }).unsafeRunSync()

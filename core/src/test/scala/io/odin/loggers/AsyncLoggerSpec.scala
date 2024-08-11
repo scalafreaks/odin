@@ -119,4 +119,22 @@ class AsyncLoggerSpec extends OdinSpec {
     }
   }
 
+  it should "discard logs on buffer exhaustion" in {
+    forAll { (msgs: List[LoggerMessage]) =>
+      TestControl
+        .executeEmbed {
+          (for {
+            ref      <- Resource.eval(IO.ref(List.empty[LoggerMessage]))
+            logger   <- RefLogger(ref).withAsync(maxBufferSize = Some(1))
+            _        <- Resource.eval(msgs.traverse(logger.log))
+            _        <- Resource.eval(IO.sleep(2.millis))
+            reported <- Resource.eval(ref.get)
+          } yield {
+            reported shouldBe msgs.take(1)
+          }).use(IO(_))
+        }
+        .unsafeRunSync()
+    }
+  }
+
 }

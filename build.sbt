@@ -113,8 +113,9 @@ lazy val cats = List(
   (version: String) => "org.typelevel" %% "cats-laws" % version % Test
 ).map(_.apply(versions.cats))
 
-lazy val catsEffect    = "org.typelevel" %% "cats-effect"     % versions.catsEffect
-lazy val catsEffectStd = "org.typelevel" %% "cats-effect-std" % versions.catsEffect
+lazy val catsEffect        = "org.typelevel" %% "cats-effect"         % versions.catsEffect
+lazy val catsEffectStd     = "org.typelevel" %% "cats-effect-std"     % versions.catsEffect
+lazy val catsEffectTestkit = "org.typelevel" %% "cats-effect-testkit" % versions.catsEffect % Test
 
 lazy val catsMtl = "org.typelevel" %% "cats-mtl" % versions.catsMtl
 
@@ -152,7 +153,7 @@ lazy val sharedSettings = Seq(
 lazy val `odin-core` = (project in file("core"))
   .settings(sharedSettings)
   .settings(
-    libraryDependencies ++= (catsEffect % Test) :: catsMtl :: sourcecode :: perfolation :: catsEffectStd :: alleycats :: cats
+    libraryDependencies ++= (catsEffect % Test) :: catsEffectTestkit :: catsMtl :: sourcecode :: perfolation :: catsEffectStd :: alleycats :: cats
   )
 
 lazy val `odin-json` = (project in file("json"))

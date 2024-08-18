@@ -16,41 +16,54 @@
 
 package io.odin.loggers
 
-import scala.concurrent.duration.*
-
 import io.odin.{Level, Logger, LoggerMessage}
 
-import cats.effect.kernel.{Async, Clock, Ref, Resource}
-import cats.effect.std.Dispatcher
+import cats.effect.kernel.{Async, Resource}
+import cats.effect.std.{Dispatcher, Queue}
 import cats.syntax.all.*
-import cats.MonadThrow
 
 /**
   * AsyncLogger spawns non-cancellable `cats.effect.Fiber` with actual log action encapsulated there.
   *
   * Use `AsyncLogger.withAsync` to instantiate it safely
   */
-private[loggers] final class AsyncLogger[F[_]: Clock](
-    buffers: Ref[F, Map[Logger[F], Vector[LoggerMessage]]],
-    maxBufferSize: Int,
+private[loggers] final class AsyncLogger[F[_]](
+    buffer: Queue[F, (Logger[F], LoggerMessage)],
     inner: Logger[F]
 )(
-    implicit F: MonadThrow[F]
+    implicit F: Async[F]
 ) extends DefaultLogger[F](inner.minLevel) {
 
-  def withMinimalLevel(level: Level): Logger[F] = new AsyncLogger(buffers, maxBufferSize, inner.withMinimalLevel(level))
+  def withMinimalLevel(level: Level): Logger[F] = new AsyncLogger(buffer, inner.withMinimalLevel(level))
 
-  def submit(msg: LoggerMessage): F[Unit] = buffers.update { buffers =>
-    buffers.updatedWith(inner) {
-      case Some(msgs) if msgs.length < maxBufferSize => Some(msgs :+ msg)
-      case None                                      => Some(Vector(msg))
-      case other                                     => other // Exhausted buffer, messages are discarded
+  def submit(msg: LoggerMessage): F[Unit] = buffer.offer(inner -> msg)
+
+  def drain: F[Unit] =
+    // Forbid cancellation after taking some elements from the queue
+    F.uncancelable { poll =>
+      poll(buffer.take).flatMap {
+        case head @ (headLogger, headMsg) =>
+          buffer.tryTakeN(None).flatMap {
+            case Nil => headLogger.log(headMsg)
+            case tail =>
+              val buffered        = head :: tail
+              val bufferedGrouped = buffered.groupMap { case (logger, _) => logger } { case (_, msg) => msg }
+              bufferedGrouped.toList.traverse_ { case (logger, msgs) => logger.log(msgs) }
+          }
+      }.voidError
     }
-  }
 
-  def drain: F[Unit] = buffers.getAndSet(Map.empty).flatMap { buffers =>
-    buffers.toList.traverse_ { case (logger, msgs) => logger.log(msgs.toList).voidError }
-  }
+  /**
+    * Same as `drain` but without semantically blocking
+    */
+  def tryDrain: F[Unit] =
+    buffer
+      .tryTakeN(None)
+      .flatMap { buffered =>
+        val bufferedGrouped = buffered.groupMap { case (logger, _) => logger } { case (_, msg) => msg }
+        bufferedGrouped.toList.traverse_ { case (logger, msgs) => logger.log(msgs) }
+      }
+      .voidError
 
 }
 
@@ -58,33 +71,26 @@ object AsyncLogger {
 
   /**
     * Create async logger and start internal loop of sending events down the chain from the buffer once
-    * `Resource` is used.
-    *
+    * `Resource` is used
     * @param inner logger that will receive messages from the buffer
-    * @param timeWindow pause between buffer flushing
     * @param maxBufferSize If `maxBufferSize` is set to some value and buffer size grows to that value,
     *                      any new events might be dropped until there is a space in the buffer.
     */
-  def withAsync[F[_]](
-      inner: Logger[F],
-      timeWindow: FiniteDuration,
-      maxBufferSize: Option[Int]
-  )(
-      implicit F: Async[F]
-  ): Resource[F, Logger[F]] = {
+  def withAsync[F[_]](inner: Logger[F], maxBufferSize: Option[Int])(implicit F: Async[F]): Resource[F, Logger[F]] = {
 
-    // Run internal loop of consuming events from the queue and push them down the chain
-    def backgroundConsumer(logger: AsyncLogger[F]): Resource[F, Unit] = {
-
-      def drainLoop: F[Unit] = F.delayBy(F.uncancelable(_ => logger.drain), timeWindow).foreverM
-
-      F.background(drainLoop).onFinalize(logger.drain).void
+    def queue: F[Queue[F, (Logger[F], LoggerMessage)]] = maxBufferSize match {
+      case Some(max) => Queue.dropping[F, (Logger[F], LoggerMessage)](max)
+      case None      => Queue.unbounded[F, (Logger[F], LoggerMessage)]
     }
 
+    // Run internal loop of consuming events from the queue and push them down the chain
+    def backgroundConsumer(logger: AsyncLogger[F]): Resource[F, Unit] =
+      F.background(logger.drain.foreverM).onFinalize(logger.tryDrain).void
+
     for {
-      buffers <- Resource.eval(Ref[F].of(Map.empty[Logger[F], Vector[LoggerMessage]]))
-      logger   = new AsyncLogger(buffers, maxBufferSize.getOrElse(Int.MaxValue), inner)
-      _       <- backgroundConsumer(logger)
+      buffer <- Resource.eval(queue)
+      logger  = new AsyncLogger(buffer, inner)
+      _      <- backgroundConsumer(logger)
     } yield logger
   }
 
@@ -93,13 +99,9 @@ object AsyncLogger {
     * @param maxBufferSize If `maxBufferSize` is set to some value and buffer size grows to that value,
     *                      any new events will be dropped until there is a space in the buffer.
     */
-  def withAsyncUnsafe[F[_]](
-      inner: Logger[F],
-      timeWindow: FiniteDuration,
-      maxBufferSize: Option[Int]
-  )(
+  def withAsyncUnsafe[F[_]](inner: Logger[F], maxBufferSize: Option[Int])(
       implicit F: Async[F],
       dispatcher: Dispatcher[F]
-  ): Logger[F] = dispatcher.unsafeRunSync(withAsync(inner, timeWindow, maxBufferSize).allocated)._1
+  ): Logger[F] = dispatcher.unsafeRunSync(withAsync(inner, maxBufferSize).allocated)._1
 
 }

@@ -16,10 +16,7 @@
 
 package io.odin
 
-import scala.concurrent.duration.*
-
 import io.odin.loggers.*
-import io.odin.loggers.{AsyncLogger, ConstContextLogger, ContextualLogger, ContramapLogger, FilterLogger, WithContext}
 import io.odin.meta.Render
 
 import cats.effect.kernel.{Async, Clock, Resource}
@@ -45,29 +42,21 @@ package object syntax {
       ContextualLogger.withContext(logger)
 
     /**
-      * Create async logger that buffers the messages up to the limit (if any) and flushes it down the chain each `timeWindow`
-      * @param timeWindow pause between async buffer flushing
+      * Create async logger that buffers the messages up to the limit (if any) and flushes it down the chain asynchronously
       * @param maxBufferSize max logs buffer size
       * @return Logger suspended in `Resource`. Once this `Resource` started, internal flush loop is initialized. Once
       *         resource is released, flushing is also stopped.
       */
-    def withAsync(
-        timeWindow: FiniteDuration = 1.millis,
-        maxBufferSize: Option[Int] = None
-    )(implicit F: Async[F]): Resource[F, Logger[F]] =
-      AsyncLogger.withAsync(logger, timeWindow, maxBufferSize)
+    def withAsync(maxBufferSize: Option[Int] = None)(implicit F: Async[F]): Resource[F, Logger[F]] =
+      AsyncLogger.withAsync(logger, maxBufferSize)
 
     /**
       * Create and unsafely run async logger that buffers the messages up to the limit (if any) and
-      * flushes it down the chain each `timeWindow`
-      * @param timeWindow  pause between async buffer flushing
+      * flushes it down the chain asynchronously
       * @param maxBufferSize max logs buffer size
       */
-    def withAsyncUnsafe(
-        timeWindow: FiniteDuration = 1.millis,
-        maxBufferSize: Option[Int] = None
-    )(implicit F: Async[F], dispatcher: Dispatcher[F]): Logger[F] =
-      AsyncLogger.withAsyncUnsafe(logger, timeWindow, maxBufferSize)
+    def withAsyncUnsafe(maxBufferSize: Option[Int] = None)(implicit F: Async[F], dispatcher: Dispatcher[F]): Logger[F] =
+      AsyncLogger.withAsyncUnsafe(logger, maxBufferSize)
 
     /**
       * Modify logger message before it's written to the logger
@@ -98,17 +87,13 @@ package object syntax {
   implicit class ResourceLoggerSyntax[F[_]](resource: Resource[F, Logger[F]]) {
 
     /**
-      * Create async logger that buffers the messages up to the limit (if any) and flushes it down the chain each `timeWindow`
-      * @param timeWindow pause between async buffer flushing
+      * Create async logger that buffers the messages up to the limit (if any) and flushes it down the chain asynchronously
       * @param maxBufferSize max logs buffer size
       * @return Logger suspended in `Resource`. Once this `Resource` started, internal flush loop is initialized. Once
       *         resource is released, flushing is also stopped.
       */
-    def withAsync(
-        timeWindow: FiniteDuration = 1.millis,
-        maxBufferSize: Option[Int] = None
-    )(implicit F: Async[F]): Resource[F, Logger[F]] =
-      resource.flatMap(AsyncLogger.withAsync(_, timeWindow, maxBufferSize))
+    def withAsync(maxBufferSize: Option[Int] = None)(implicit F: Async[F]): Resource[F, Logger[F]] =
+      resource.flatMap(AsyncLogger.withAsync(_, maxBufferSize))
 
     /**
       * Create logger that adds constant context to each log record

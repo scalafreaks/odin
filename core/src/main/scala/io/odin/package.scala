@@ -84,26 +84,23 @@ package object odin {
     * Create async logger with safe log file allocation and intermediate async buffer
     * @param fileName name of log file to append to
     * @param formatter formatter to use
-    * @param timeWindow pause between async buffer flushing
     * @param maxBufferSize maximum buffer size
     * @param minLevel minimal level of logs to be printed
     */
   def asyncFileLogger[F[_]: Async](
       fileName: String,
       formatter: Formatter = Formatter.default,
-      timeWindow: FiniteDuration = 1.second,
       maxBufferSize: Option[Int] = None,
       minLevel: Level = Level.Trace,
       openOptions: Seq[OpenOption] = Seq.empty
   ): Resource[F, Logger[F]] =
-    fileLogger[F](fileName, formatter, minLevel, openOptions).withAsync(timeWindow, maxBufferSize)
+    fileLogger[F](fileName, formatter, minLevel, openOptions).withAsync(maxBufferSize)
 
   /**
     * Same as [[rollingFileLogger]] but with intermediate async buffer
     * @param fileNamePattern function that provides a path to a log file given a current local datetime
     * @param rolloverInterval interval for rollover. When set, new log file is created each time interval is over
     * @param maxFileSizeInBytes max size of log file. When set, new log file is created each time the current log file size exceeds the setting
-    * @param timeWindow pause between async buffer flushing
     * @param maxBufferSize maximum buffer size
     * @param formatter formatter to use
     * @param minLevel minimal level of logs to be printed
@@ -112,13 +109,12 @@ package object odin {
       fileNamePattern: LocalDateTime => String,
       rolloverInterval: Option[FiniteDuration],
       maxFileSizeInBytes: Option[Long],
-      timeWindow: FiniteDuration = 1.second,
       maxBufferSize: Option[Int] = None,
       formatter: Formatter = Formatter.default,
       minLevel: Level = Level.Trace,
       openOptions: Seq[OpenOption] = Seq.empty
   ): Resource[F, Logger[F]] =
     rollingFileLogger(fileNamePattern, rolloverInterval, maxFileSizeInBytes, formatter, minLevel, openOptions)
-      .withAsync(timeWindow, maxBufferSize)
+      .withAsync(maxBufferSize)
 
 }

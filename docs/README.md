@@ -405,15 +405,11 @@ as well as controllable in-memory buffering for logs before they're flushed down
 Definition of `withAsync` is following:
 
 ```scala
-def withAsync(
-               timeWindow: FiniteDuration = 1.millis,
-               maxBufferSize: Option[Int] = None
-             )(implicit F: Async[F]): Resource[F, Logger[F]]
+def withAsync(maxBufferSize: Option[Int] = None)(implicit F: Async[F]): Resource[F, Logger[F]]
 ```
 
 Following parameters are configurable if default ones don't fit:
 
-- Time period between flushed, default is 1 millisecond
 - Maximum underlying buffer size, by default buffer is unbounded.
 
 ## Class and enclosure routing

@@ -777,7 +777,7 @@ class ExternalLogger extends OdinLoggerBinder[IO] {
 ```
 
 - Create resource file `META-INF/services/org.slf4j.spi.SLF4JServiceProvider` with the FQDN for class `ExternalLogger`
-  (alternatively, if you're running on SLF4J API 2.0.9 or higher, You can specify the provider class explicitly via the 
+  (alternatively, if running with SLF4J API 2.0.9 or higher, you can specify the provider class explicitly via the 
   `slf4j.provider` system property)
 
 Latter is required for SL4J API to load it in runtime and use as a provider for `LoggerFactory`.  

@@ -91,7 +91,7 @@ lazy val versions = new {
 
   val scribe = "3.15.0"
 
-  val slf4j = "1.7.36"
+  val slf4j = "2.0.16"
 
   val slf4j1 = "1.7.36"
 
@@ -181,6 +181,13 @@ lazy val `odin-slf4j` = (project in file("slf4j"))
   )
   .dependsOn(`odin-core` % "compile->compile;test->test")
 
+lazy val `odin-slf4j-provider` = (project in file("slf4j-provider"))
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies += slf4j
+  )
+  .dependsOn(`odin-core` % "compile->compile;test->test")
+
 lazy val `odin-slf4j1-provider` = (project in file("slf4j1-provider"))
   .settings(sharedSettings)
   .settings(
@@ -238,6 +245,7 @@ lazy val odin =
     `odin-json`,
     `odin-zio`,
     `odin-slf4j`,
+    `odin-slf4j-provider`,
     `odin-slf4j1-provider`,
     `odin-extras`,
     benchmarks,

@@ -739,7 +739,7 @@ results. One known difference is that for Scala 3, value classes are currently n
 
 ## SLF4J Interop
 
-### SLF4J bridge
+### SLF4J 2.0 provider
 
 In case if some dependencies in the project use SL4J as a logging API, it's possible to provide Odin logger as a
 backend.
@@ -748,7 +748,55 @@ It requires a two-step setup:
 - Add following dependency to your build:
 
 ```scala
-libraryDependencies += "dev.scalafreaks" %% "odin-slf4j" % "@VERSION@"
+libraryDependencies += "dev.scalafreaks" %% "odin-slf4j-provider" % "@VERSION@"
+```
+
+- Create Scala class `ExternalLogger` somewhere in the project:
+
+```scala mdoc:reset
+import cats.effect.{Sync, IO}
+import cats.effect.std.Dispatcher
+import cats.effect.unsafe.implicits.global
+import io.odin._
+import io.odin.slf4j.OdinLoggerBinder
+
+//effect type should be specified inbefore
+//log line will be recorded right after the call with no suspension
+class ExternalLogger extends OdinLoggerBinder[IO] {
+
+  implicit val F: Sync[IO] = IO.asyncForIO
+  implicit val dispatcher: Dispatcher[IO] = Dispatcher.sequential[IO].allocated.unsafeRunSync()._1
+
+  val loggers: PartialFunction[String, Logger[IO]] = {
+    case "some.external.package.SpecificClass" =>
+      consoleLogger[IO](minLevel = Level.Warn) //disable noisy external logs
+    case _ => //if wildcard case isn't provided, default logger is no-op
+      consoleLogger[IO]()
+  }
+}
+```
+
+- Create resource file `META-INF/services/org.slf4j.spi.SLF4JServiceProvider` with the FQDN for class `ExternalLogger`
+  (alternatively, if you're running on SLF4J API 2.0.9 or higher, You can specify the provider class explicitly via the 
+  `slf4j.provider` system property)
+
+Latter is required for SL4J API to load it in runtime and use as a provider for `LoggerFactory`.  
+Partial function is used as a factory router to load correct logger backend. On undefined case the no-op logger is
+provided by default,
+so no logs are recorded.
+
+This provider doesn't support MDC nor Markers.
+
+### SLF4J 1.7 provider (legacy)
+
+In case if some dependencies in the project use SL4J as a logging API, it's possible to provide Odin logger as a
+backend.
+It requires a two-step setup:
+
+- Add following dependency to your build:
+
+```scala
+libraryDependencies += "dev.scalafreaks" %% "odin-slf4j1-provider" % "@VERSION@"
 ```
 
 - Create Scala class `ExternalLogger` somewhere in the project:

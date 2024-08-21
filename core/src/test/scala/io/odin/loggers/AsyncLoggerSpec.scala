@@ -80,7 +80,7 @@ class AsyncLoggerSpec extends OdinSpec {
         buffer <- Queue.unbounded[IO, (Logger[IO], LoggerMessage)]
         logger  = new AsyncLogger(buffer, errorLogger)
         _      <- logger.log(msgs)
-        result <- logger.drain.unlessA(msgs.isEmpty)
+        result <- logger.blockingDrain.unlessA(msgs.isEmpty)
       } yield {
         result shouldBe ()
       }).unsafeRunSync()
@@ -96,9 +96,9 @@ class AsyncLoggerSpec extends OdinSpec {
         logger        = new AsyncLogger(buffer, RefLogger(ref, Level.Info))
         traceLogger   = logger.withMinimalLevel(Level.Trace)
         _            <- msgs.traverse(logger.log)      // only Info, Warn, Error messages should be logged
-        _            <- logger.tryDrain
+        _            <- logger.drain(None)
         _            <- msgs.traverse(traceLogger.log) // all messages should be logged
-        _            <- logger.tryDrain
+        _            <- logger.drain(None)
         reported     <- ref.get
       } yield {
         val (infos, all) = reported.splitAt(infoMessages.size)

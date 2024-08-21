@@ -38,30 +38,22 @@ private[loggers] final class AsyncLogger[F[_]](
 
   def submit(msg: LoggerMessage): F[Unit] = buffer.offer(inner -> msg)
 
-  def drain: F[Unit] =
+  def blockingDrain: F[Unit] =
     // Forbid cancellation after taking some elements from the queue
-    F.uncancelable { poll =>
-      poll(buffer.take).flatMap {
-        case head @ (headLogger, headMsg) =>
-          buffer.tryTakeN(None).flatMap {
-            case Nil => headLogger.log(headMsg)
-            case tail =>
-              val buffered        = head :: tail
-              val bufferedGrouped = buffered.groupMap { case (logger, _) => logger } { case (_, msg) => msg }
-              bufferedGrouped.toList.traverse_ { case (logger, msgs) => logger.log(msgs) }
-          }
-      }.voidError
-    }
+    F.uncancelable { poll => poll(buffer.take).flatMap(head => drain(Some(head))) }
 
   /**
-    * Same as `drain` but without semantically blocking
+    * Same as `blockingDrain` but without semantically blocking
     */
-  def tryDrain: F[Unit] =
+  def drain(head: Option[(Logger[F], LoggerMessage)]): F[Unit] =
     buffer
       .tryTakeN(None)
-      .flatMap { buffered =>
-        val bufferedGrouped = buffered.groupMap { case (logger, _) => logger } { case (_, msg) => msg }
-        bufferedGrouped.toList.traverse_ { case (logger, msgs) => logger.log(msgs) }
+      .map(tail => head.fold(tail)(_ :: tail))
+      .flatMap {
+        case (headLogger, headMsg) :: Nil => headLogger.log(headMsg)
+        case unbuffered =>
+          val unbufferedGrouped = unbuffered.groupMap { case (logger, _) => logger } { case (_, msg) => msg }
+          unbufferedGrouped.toList.traverse_ { case (logger, msgs) => logger.log(msgs) }
       }
       .voidError
 
@@ -85,7 +77,7 @@ object AsyncLogger {
 
     // Run internal loop of consuming events from the queue and push them down the chain
     def backgroundConsumer(logger: AsyncLogger[F]): Resource[F, Unit] =
-      F.background(logger.drain.foreverM).onFinalize(logger.tryDrain).void
+      F.background(logger.blockingDrain.foreverM).onFinalize(logger.drain(None)).void
 
     for {
       buffer <- Resource.eval(queue)

@@ -17,7 +17,6 @@
 package io.odin
 
 import scala.annotation.nowarn
-import scala.concurrent.duration.*
 
 import io.odin.formatter.Formatter
 
@@ -70,7 +69,6 @@ package object zio {
   def asyncFileLogger(
       fileName: String,
       formatter: Formatter = Formatter.default,
-      timeWindow: FiniteDuration = 1.second,
       maxBufferSize: Option[Int] = None,
       minLevel: Level = Level.Trace
   ): ZManaged[Clock & Blocking, LoggerError, Logger[IO[LoggerError, *]]] =
@@ -79,7 +77,7 @@ package object zio {
       .flatMap { implicit F =>
         ZManaged.fromEffect {
           Dispatcher.sequential[Task].use { implicit dispatcher =>
-            Task(io.odin.asyncFileLogger[Task](fileName, formatter, timeWindow, maxBufferSize, minLevel).toManaged)
+            Task(io.odin.asyncFileLogger[Task](fileName, formatter, maxBufferSize, minLevel).toManaged)
           }
         }
       }

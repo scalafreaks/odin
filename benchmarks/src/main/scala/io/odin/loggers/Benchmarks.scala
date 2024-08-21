@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package io.odin
+package io.odin.loggers
 
 import java.nio.file.{Files, Paths}
 import java.util.concurrent.TimeUnit
 import java.util.UUID
 
+import io.odin.{fileLogger, Logger, LoggerMessage}
 import io.odin.formatter.options.{PositionFormat, ThrowableFormat}
 import io.odin.formatter.Formatter
 import io.odin.json.Formatter as JsonFormatter
-import io.odin.loggers.DefaultLogger
 import io.odin.meta.Position
 import io.odin.syntax.*
 
@@ -224,6 +224,40 @@ class AsyncLoggerBenchmark extends OdinBenchmarks {
   @OperationsPerInvocation(1000)
   def msgCtxThrowable(): Unit =
     (1 to 1000).toList.traverse_(_ => asyncLogger.info(message, context, throwable)).unsafeRunSync()
+
+  @TearDown
+  def tearDown(): Unit = {
+    cancelToken.unsafeRunSync()
+    Files.delete(Paths.get(fileName))
+  }
+
+}
+
+@State(Scope.Benchmark)
+class AsyncLoggerDrainBenchmark extends OdinBenchmarks {
+
+  val fileName: String = Files.createTempFile(UUID.randomUUID().toString, "").toAbsolutePath.toString
+
+  val (asyncLogger: AsyncLogger[IO], cancelToken: IO[Unit]) =
+    fileLogger[IO](fileName)
+      .withAsync(maxBufferSize = Some(1000000))
+      .map(_.asInstanceOf[AsyncLogger[IO]])
+      .allocated
+      .unsafeRunSync()
+
+  @Benchmark
+  @OperationsPerInvocation(1000)
+  def msg(): Unit = asyncLogger.info(message).replicateA_(1000).productR(asyncLogger.drain(None)).unsafeRunSync()
+
+  @Benchmark
+  @OperationsPerInvocation(1000)
+  def msgAndCtx(): Unit =
+    asyncLogger.info(message, context).replicateA_(1000).productR(asyncLogger.drain(None)).unsafeRunSync()
+
+  @Benchmark
+  @OperationsPerInvocation(1000)
+  def msgCtxThrowable(): Unit =
+    asyncLogger.info(message, context, throwable).replicateA_(1000).productR(asyncLogger.drain(None)).unsafeRunSync()
 
   @TearDown
   def tearDown(): Unit = {

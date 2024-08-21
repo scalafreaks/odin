@@ -42,9 +42,6 @@ private[loggers] final class AsyncLogger[F[_]](
     // Forbid cancellation after taking some elements from the queue
     F.uncancelable { poll => poll(buffer.take).flatMap(head => drain(Some(head))) }
 
-  /**
-    * Same as `blockingDrain` but without semantically blocking
-    */
   def drain(head: Option[(Logger[F], LoggerMessage)]): F[Unit] =
     buffer
       .tryTakeN(None)

@@ -73,7 +73,7 @@ lazy val versions = new {
 
   val disruptor = "4.0.0"
 
-  val jsoniter = "2.30.8"
+  val jsoniter = "2.30.9"
 
   val log4j = "2.23.1"
 

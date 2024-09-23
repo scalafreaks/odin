@@ -16,6 +16,8 @@ ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
 
 ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
 
+ThisBuild / tlCiReleaseBranches := Seq.empty
+
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
 ThisBuild / githubWorkflowAddedJobs += {
@@ -60,8 +62,7 @@ ThisBuild / githubWorkflowPublishPostamble := Seq(
   )
 )
 
-ThisBuild / githubWorkflowTargetBranches :=
-  (ThisBuild / githubWorkflowTargetBranches).value.filterNot(_.contains("update/"))
+ThisBuild / githubWorkflowTargetBranches := Seq("*")
 
 lazy val versions = new {
 

@@ -105,7 +105,7 @@ Documentation
 - [Extras](#extras)
     - [Conditional Logging](#extras-conditional-logging)
     - [Derivation](#extras-derivation)
-- [SL4FJ bridge](#slf4j-bridge)
+- [SL4FJ bridge](#slf4j-interop)
 - [Benchmarks](#benchmarks)
 
 ## Logger interface

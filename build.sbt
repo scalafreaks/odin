@@ -16,6 +16,8 @@ ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
 
 ThisBuild / tlVersionIntroduced := Map("3" -> "0.12.0")
 
+ThisBuild / tlCiReleaseBranches := Seq.empty
+
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
 ThisBuild / githubWorkflowAddedJobs += {
@@ -60,8 +62,7 @@ ThisBuild / githubWorkflowPublishPostamble := Seq(
   )
 )
 
-ThisBuild / githubWorkflowTargetBranches :=
-  (ThisBuild / githubWorkflowTargetBranches).value.filterNot(_.contains("update/"))
+ThisBuild / githubWorkflowTargetBranches := Seq("*")
 
 lazy val versions = new {
 
@@ -73,9 +74,9 @@ lazy val versions = new {
 
   val disruptor = "4.0.0"
 
-  val jsoniter = "2.30.9"
+  val jsoniter = "2.30.11"
 
-  val log4j = "2.23.1"
+  val log4j = "2.24.0"
 
   val magnoliaScala2 = "1.1.10"
 
@@ -83,7 +84,7 @@ lazy val versions = new {
 
   val perfolation = "1.2.11"
 
-  val scalaCheck = "1.18.0"
+  val scalaCheck = "1.18.1"
 
   val scalaTest = "3.2.19"
 

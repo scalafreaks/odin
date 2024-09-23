@@ -9,9 +9,9 @@ name: Continuous Integration
 
 on:
   pull_request:
-    branches: ['**', '!pr/**']
+    branches: ['*']
   push:
-    branches: ['**', '!pr/**']
+    branches: ['*']
     tags: [v*]
 
 env:

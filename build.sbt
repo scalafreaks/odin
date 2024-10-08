@@ -9,8 +9,9 @@ ThisBuild / developers       := List(tlGitHubDev("aartigao", "Alan Artigao"))
 ThisBuild / tlFatalWarnings := true
 ThisBuild / tlJdkRelease    := Some(11)
 
-val Scala2 = "2.13.14"
+val Scala2 = "2.13.15"
 val Scala3 = "3.3.4"
+
 ThisBuild / scalaVersion       := Scala2
 ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
 
@@ -76,7 +77,7 @@ lazy val versions = new {
 
   val jsoniter = "2.30.11"
 
-  val log4j = "2.24.0"
+  val log4j = "2.24.1"
 
   val magnoliaScala2 = "1.1.10"
 

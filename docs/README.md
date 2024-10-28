@@ -749,7 +749,7 @@ libraryDependencies += "dev.scalafreaks" %% "odin-slf4j-provider" % "@VERSION@"
 
 - Create Scala class `ExternalLogger` somewhere in the project:
 
-```scala mdoc:reset
+```scala
 import cats.effect.{Sync, IO}
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global
@@ -797,7 +797,7 @@ libraryDependencies += "dev.scalafreaks" %% "odin-slf4j1-provider" % "@VERSION@"
 
 - Create Scala class `ExternalLogger` somewhere in the project:
 
-```scala mdoc:reset
+```scala
 import cats.effect.{Sync, IO}
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global

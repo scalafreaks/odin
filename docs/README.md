@@ -754,11 +754,11 @@ import cats.effect.{Sync, IO}
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global
 import io.odin._
-import io.odin.slf4j.OdinLoggerBinder
+import io.odin.slf4j.OdinLoggerServiceProvider
 
 //effect type should be specified inbefore
 //log line will be recorded right after the call with no suspension
-class ExternalLogger extends OdinLoggerBinder[IO] {
+class ExternalLogger extends OdinLoggerServiceProvider[IO] {
 
   implicit val F: Sync[IO] = IO.asyncForIO
   implicit val dispatcher: Dispatcher[IO] = Dispatcher.sequential[IO].allocated.unsafeRunSync()._1

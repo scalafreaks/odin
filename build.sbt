@@ -69,7 +69,7 @@ lazy val versions = new {
 
   val cats = "2.12.0"
 
-  val catsEffect = "3.5.5"
+  val catsEffect = "3.5.6"
 
   val catsMtl = "1.5.0"
 

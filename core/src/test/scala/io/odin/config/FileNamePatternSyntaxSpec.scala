@@ -89,7 +89,9 @@ class FileNamePatternSyntaxSpec extends OdinSpec {
   "file" should "process multiple arguments" in {
     forAll { (dt: LocalDateTime) =>
       file"$year-$month-$day"
-        .apply(dt) shouldBe s"${checkPadding(dt.getYear)}-${checkPadding(dt.getMonthValue)}-${checkPadding(dt.getDayOfMonth)}"
+        .apply(
+          dt
+        ) shouldBe s"${checkPadding(dt.getYear)}-${checkPadding(dt.getMonthValue)}-${checkPadding(dt.getDayOfMonth)}"
     }
   }
 

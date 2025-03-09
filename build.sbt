@@ -9,7 +9,7 @@ ThisBuild / developers       := List(tlGitHubDev("aartigao", "Alan Artigao"))
 ThisBuild / tlFatalWarnings := true
 ThisBuild / tlJdkRelease    := Some(11)
 
-val Scala2 = "2.13.15"
+val Scala2 = "2.13.16"
 val Scala3 = "3.3.5"
 
 ThisBuild / scalaVersion       := Scala2
@@ -67,7 +67,7 @@ ThisBuild / githubWorkflowTargetBranches := Seq("*")
 
 lazy val versions = new {
 
-  val cats = "2.12.0"
+  val cats = "2.13.0"
 
   val catsEffect = "3.5.7"
 
@@ -75,13 +75,13 @@ lazy val versions = new {
 
   val disruptor = "4.0.0"
 
-  val jsoniter = "2.33.0"
+  val jsoniter = "2.33.2"
 
   val log4j = "2.24.3"
 
   val magnoliaScala2 = "1.1.10"
 
-  val magnoliaScala3 = "1.3.8"
+  val magnoliaScala3 = "1.3.16"
 
   val perfolation = "1.2.11"
 

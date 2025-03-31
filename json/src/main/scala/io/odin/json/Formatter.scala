@@ -27,12 +27,30 @@ object Formatter {
 
   val json: OFormatter = create(ThrowableFormat.Default, PositionFormat.Full)
 
+  val ecsJson: OFormatter = { (msg: LoggerMessage) =>
+    val classAndMethod = formatPositionAsClassAndMethod(msg.position)
+    writeToString(
+      Output.ECS(
+        formatTimestamp(msg.timestamp),
+        msg.message.value,
+        msg.context,
+        msg.level,
+        classAndMethod.map(_._1),
+        msg.position.line,
+        formatPositionAsFileName(msg.position),
+        classAndMethod.map(_._2),
+        msg.threadName,
+        msg.exception.map(t => formatThrowable(t, ThrowableFormat.Default))
+      )
+    )
+  }
+
   def create(throwableFormat: ThrowableFormat): OFormatter =
     create(throwableFormat, PositionFormat.Full)
 
   def create(throwableFormat: ThrowableFormat, positionFormat: PositionFormat): OFormatter = { (msg: LoggerMessage) =>
     writeToString(
-      Output(
+      Output.Default(
         msg.level,
         msg.message.value,
         msg.context,

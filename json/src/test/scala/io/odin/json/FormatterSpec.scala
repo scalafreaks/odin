@@ -57,4 +57,37 @@ class FormatterSpec extends OdinSpec {
     }
   }
 
+  "ecsJson.format" should "generate correct json" in {
+    def jsonMethod = Formatter.ecsJson.format(
+      LoggerMessage(
+        Level.Info,
+        Eval.later("just a test"),
+        Map("a" -> "field"),
+        Some(new Exception("test exception")),
+        Position.derivePosition,
+        "test-thread-1",
+        Instant.EPOCH.toEpochMilli
+      )
+    )
+
+    val jsonString = jsonMethod
+
+    jsonString should include(""""@timestamp":"1970-01-01""")
+    jsonString should include(""""message":"just a test"""")
+    jsonString should include(""""labels":{"a":"field"}""")
+    jsonString should include(""""log.level":"INFO"""")
+    jsonString should include(""""log.logger":"io.odin.json.FormatterSpec"""")
+    jsonString should include(""""log.origin.file.line":67""")
+    jsonString should include(""""log.origin.file.name":"FormatterSpec.scala"""")
+    jsonString should include(""""log.origin.function":"jsonMethod"""")
+    jsonString should include(""""process.thread.name":"test-thread-1"""")
+    jsonString should include(""""error.stack_trace":"Caused by: java.lang.Exception: test exception""")
+  }
+
+  it should "serialize any LoggerMessage" in {
+    forAll(loggerMessageGen) { m =>
+      noException should be thrownBy Formatter.ecsJson.format(m)
+    }
+  }
+
 }

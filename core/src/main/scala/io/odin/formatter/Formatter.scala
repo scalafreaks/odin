@@ -140,6 +140,21 @@ object Formatter {
   }
 
   /**
+    * Extracts class and method names from position
+    */
+  def formatPositionAsClassAndMethod(position: Position): Option[(String, String)] =
+    position.enclosureName.split('#') match {
+      case Array(fqdn, method) => Some((fqdn, method))
+      case _                   => None
+    }
+
+  def formatPositionAsFileName(position: Position): String =
+    position.fileName.lastIndexOf('/') match {
+      case -1  => position.fileName
+      case idx => position.fileName.substring(idx + 1)
+    }
+
+  /**
     * Default Throwable printer is twice as slow. This method was borrowed from scribe library.
     *
     * The result differs depending on the format:

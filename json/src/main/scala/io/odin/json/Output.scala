@@ -22,17 +22,36 @@ import cats.syntax.show.*
 import com.github.plokhotnyuk.jsoniter_scala.core.*
 import com.github.plokhotnyuk.jsoniter_scala.macros.*
 
-private[json] final case class Output(
-    level: Level,
-    message: String,
-    context: Map[String, String],
-    exception: Option[String],
-    position: String,
-    threadName: String,
-    timestamp: String
-)
-
 object Output {
+
+  private[json] final case class Default(
+      level: Level,
+      message: String,
+      context: Map[String, String],
+      exception: Option[String],
+      position: String,
+      threadName: String,
+      timestamp: String
+  )
+
+  /**
+    * Elastic Common Schema fields
+    *
+    * @see [[https://www.elastic.co/guide/en/ecs/current/ecs-guidelines.html ECS Guidelines]]
+    * @see [[https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html ECS Field Reference]]
+    */
+  private[json] final case class ECS(
+      `@timestamp`: String,
+      message: String,
+      labels: Map[String, String],
+      `log.level`: Level,
+      `log.logger`: Option[String],
+      `log.origin.file.line`: Int,
+      `log.origin.file.name`: String,
+      `log.origin.function`: Option[String],
+      `process.thread.name`: String,
+      `error.stack_trace`: Option[String]
+  )
 
   private[json] implicit val levelCodec: JsonValueCodec[Level] = new JsonValueCodec[Level] {
 
@@ -45,7 +64,9 @@ object Output {
 
   }
 
-  private[json] implicit val codec: JsonValueCodec[Output] =
+  private[json] implicit val defaultCodec: JsonValueCodec[Default] =
     JsonCodecMaker.make(CodecMakerConfig.withFieldNameMapper(JsonCodecMaker.enforce_snake_case))
+
+  private[json] implicit val ecsCodec: JsonValueCodec[ECS] = JsonCodecMaker.make
 
 }

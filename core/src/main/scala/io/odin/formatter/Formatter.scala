@@ -144,7 +144,7 @@ object Formatter {
     */
   def formatPositionAsClassAndMethod(position: Position): Option[(String, String)] =
     position.enclosureName.split('#') match {
-      case Array(logger, name) => Some((logger, name))
+      case Array(fqdn, method) => Some((fqdn, method))
       case _                   => None
     }
 

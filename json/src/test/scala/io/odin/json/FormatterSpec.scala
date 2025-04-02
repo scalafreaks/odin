@@ -90,4 +90,33 @@ class FormatterSpec extends OdinSpec {
     }
   }
 
+  "logstashJson.format" should "generate correct json" in {
+    def jsonMethod = Formatter.logstashJson.format(
+      LoggerMessage(
+        Level.Info,
+        Eval.later("just a test"),
+        Map("a" -> "field"),
+        Some(new Exception("test exception")),
+        Position.derivePosition,
+        "test-thread-1",
+        Instant.EPOCH.toEpochMilli
+      )
+    )
+
+    val jsonString = jsonMethod
+
+    jsonString should include(""""@timestamp":"1970-01-01""")
+    jsonString should include(""""message":"just a test"""")
+    jsonString should include(""""level":"INFO"""")
+    jsonString should include(""""logger_name":"io.odin.json.FormatterSpec"""")
+    jsonString should include(""""thread_name":"test-thread-1"""")
+    jsonString should include(""""stack_trace":"Caused by: java.lang.Exception: test exception""")
+  }
+
+  it should "serialize any LoggerMessage" in {
+    forAll(loggerMessageGen) { m =>
+      noException should be thrownBy Formatter.logstashJson.format(m)
+    }
+  }
+
 }

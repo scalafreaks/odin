@@ -53,6 +53,22 @@ object Output {
       `error.stack_trace`: Option[String]
   )
 
+  /**
+    * Logstash fields (as defined by `logstash-logback-encoder`).
+    *
+    * Some fields like `level_value` are ignored for efficiency. Reach out to the maintainers if needed.
+    *
+    * @see [[https://github.com/logfellow/logstash-logback-encoder?tab=readme-ov-file#standard-fields Standard Fields]]
+    */
+  private[json] final case class Logstash(
+      `@timestamp`: String,
+      message: String,
+      level: Level,
+      logger_name: Option[String],
+      thread_name: String,
+      stack_trace: Option[String]
+  )
+
   private[json] implicit val levelCodec: JsonValueCodec[Level] = new JsonValueCodec[Level] {
 
     // we never decode these
@@ -68,5 +84,7 @@ object Output {
     JsonCodecMaker.make(CodecMakerConfig.withFieldNameMapper(JsonCodecMaker.enforce_snake_case))
 
   private[json] implicit val ecsCodec: JsonValueCodec[ECS] = JsonCodecMaker.make
+
+  private[json] implicit val logstashCodec: JsonValueCodec[Logstash] = JsonCodecMaker.make
 
 }

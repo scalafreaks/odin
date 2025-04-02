@@ -45,6 +45,20 @@ object Formatter {
     )
   }
 
+  val logstashJson: OFormatter = { (msg: LoggerMessage) =>
+    val classAndMethod = formatPositionAsClassAndMethod(msg.position)
+    writeToString(
+      Output.Logstash(
+        formatTimestamp(msg.timestamp),
+        msg.message.value,
+        msg.level,
+        classAndMethod.map(_._1),
+        msg.threadName,
+        msg.exception.map(t => formatThrowable(t, ThrowableFormat.Default))
+      )
+    )
+  }
+
   def create(throwableFormat: ThrowableFormat): OFormatter =
     create(throwableFormat, PositionFormat.Full)
 

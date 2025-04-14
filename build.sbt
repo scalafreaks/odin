@@ -83,7 +83,7 @@ lazy val versions = new {
 
   val magnoliaScala3 = "1.3.16"
 
-  val perfolation = "1.2.11"
+  val perfolation = "1.2.12"
 
   val scalaCheck = "1.18.1"
 

@@ -77,7 +77,7 @@ lazy val versions = new {
 
   val jsoniter = "2.36.6"
 
-  val log4j = "2.25.0"
+  val log4j = "2.25.1"
 
   val magnoliaScala2 = "1.1.10"
 

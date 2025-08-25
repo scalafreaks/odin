@@ -71,7 +71,7 @@ lazy val versions = new {
 
   val catsEffect = "3.6.3"
 
-  val catsMtl = "1.5.0"
+  val catsMtl = "1.6.0"
 
   val disruptor = "4.0.0"
 

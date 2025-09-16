@@ -97,7 +97,7 @@ lazy val versions = new {
 
   val slf4j1 = "1.7.36"
 
-  val sourcecode = "0.4.2"
+  val sourcecode = "0.4.4"
 
   val zio = "1.0.18"
 

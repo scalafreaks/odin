@@ -9,7 +9,7 @@ ThisBuild / developers       := List(tlGitHubDev("aartigao", "Alan Artigao"))
 ThisBuild / tlFatalWarnings := true
 ThisBuild / tlJdkRelease    := Some(11)
 
-val Scala2 = "2.13.16"
+val Scala2 = "2.13.17"
 val Scala3 = "3.3.5"
 
 ThisBuild / scalaVersion       := Scala2

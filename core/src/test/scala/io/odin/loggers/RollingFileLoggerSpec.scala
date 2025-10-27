@@ -49,7 +49,7 @@ class RollingFileLoggerSpec extends OdinSpec {
         (for {
           path      <- fileResource
           filePrefix = path.toString
-          logger <- RollingFileLogger[IO](
+          logger    <- RollingFileLogger[IO](
                       file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
                       maxFileSizeInBytes = None,
                       rolloverInterval = None,
@@ -70,7 +70,7 @@ class RollingFileLoggerSpec extends OdinSpec {
         (for {
           path      <- fileResource
           filePrefix = path.toString
-          logger <- RollingFileLogger[IO](
+          logger    <- RollingFileLogger[IO](
                       file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
                       maxFileSizeInBytes = None,
                       rolloverInterval = None,
@@ -93,7 +93,7 @@ class RollingFileLoggerSpec extends OdinSpec {
         (for {
           path      <- fileResource
           filePrefix = path.toString
-          logger <- asyncRollingFileLogger[IO](
+          logger    <- asyncRollingFileLogger[IO](
                       file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
                       rolloverInterval = None,
                       maxFileSizeInBytes = None,
@@ -117,7 +117,7 @@ class RollingFileLoggerSpec extends OdinSpec {
         path      <- fileResource
         time      <- Resource.eval(IO.realTime)
         filePrefix = path.toString
-        _ <- RollingFileLogger[IO](
+        _         <- RollingFileLogger[IO](
                file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
                maxFileSizeInBytes = None,
                rolloverInterval = None,
@@ -141,7 +141,7 @@ class RollingFileLoggerSpec extends OdinSpec {
         (for {
           path      <- fileResource
           filePrefix = path.toString
-          logger <- RollingFileLogger[IO](
+          logger    <- RollingFileLogger[IO](
                       file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
                       maxFileSizeInBytes = None,
                       rolloverInterval = Some(1.second),
@@ -165,7 +165,7 @@ class RollingFileLoggerSpec extends OdinSpec {
         (for {
           path      <- fileResource
           filePrefix = path.toString
-          logger <- RollingFileLogger[IO](
+          logger    <- RollingFileLogger[IO](
                       file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
                       maxFileSizeInBytes = Some(1),
                       rolloverInterval = None,

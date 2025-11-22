@@ -94,6 +94,7 @@ Documentation
 - [File logger](#file-logger)
     - [Rolling file logger](#rolling-file-logger)
 - [Async logger](#async-logger)
+- [`otel4s` logger](#otel4s-logger)
 - [Class and enclosure routing](#class-and-enclosure-routing)
 - [Loggers composition](#loggers-composition)
 - [Constant context](#constant-context)
@@ -431,6 +432,28 @@ def withAsync(maxBufferSize: Option[Int] = None)(implicit F: Async[F]): Resource
 Following parameters are configurable if default ones don't fit:
 
 - Maximum underlying buffer size, by default buffer is unbounded.
+
+## `otel4s` logger
+
+To export logs to [OpenTelemetry](https://opentelemetry.io/), you can use the [`otel4s` logs](https://typelevel.org/otel4s/instrumentation/logs.html) integration.
+
+```scala
+libraryDependencies += "dev.scalafreaks" %% "odin-otel4s" % "0.18.0"
+```
+
+If you have an instance of `Otel4s[F]` in scope, you can create a logger:
+
+```scala
+import org.typelevel.otel4s.Otel4s
+import io.odin.otel4s._
+
+val otel4s: Otel4s[IO] = ???
+
+implicit val loggerProvider = otel4s.loggerProvider
+implicit val localContext = otel4s.localContext
+
+val logger = otel4sLogger[IO, otel4s.Ctx]()
+```
 
 ## Class and enclosure routing
 

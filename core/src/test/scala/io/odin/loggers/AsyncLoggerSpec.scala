@@ -59,7 +59,7 @@ class AsyncLoggerSpec extends OdinSpec {
       (for {
         buffer <- Queue.unbounded[IO, (Logger[IO], LoggerMessage)]
         ref    <- IO.ref(List.empty[LoggerMessage])
-        logger = new AsyncLogger(buffer, RefLogger(ref).withMinimalLevel(Level.Trace))
+        logger  = new AsyncLogger(buffer, RefLogger(ref).withMinimalLevel(Level.Trace))
                    .withMinimalLevel(Level.Trace)
         _        <- msgs.traverse(logger.log)
         reported <- buffer.tryTakeN(None).map(_.map(_._2))

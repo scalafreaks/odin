@@ -50,7 +50,7 @@ class ConditionalLoggerSpec extends OdinSpec {
       val fa =
         for {
           ref <- Ref.of[F, List[LoggerMessage]](List.empty)
-          _ <- RefLogger(ref)
+          _   <- RefLogger(ref)
                  .withMinimalLevel(Level.Info)
                  .withContext
                  .withErrorLevel(Level.Debug)(logger => logger.log(messages))
@@ -70,7 +70,7 @@ class ConditionalLoggerSpec extends OdinSpec {
 
       val fa =
         for {
-          ref <- Ref.of[F, List[LoggerMessage]](List.empty)
+          ref     <- Ref.of[F, List[LoggerMessage]](List.empty)
           attempt <- RefLogger(ref)
                        .withMinimalLevel(Level.Info)
                        .withContext

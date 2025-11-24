@@ -9,8 +9,8 @@ ThisBuild / developers       := List(tlGitHubDev("aartigao", "Alan Artigao"))
 ThisBuild / tlFatalWarnings := true
 ThisBuild / tlJdkRelease    := Some(11)
 
-val Scala2 = "2.13.16"
-val Scala3 = "3.3.5"
+val Scala2 = "2.13.17"
+val Scala3 = "3.3.7"
 
 ThisBuild / scalaVersion       := Scala2
 ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)
@@ -22,7 +22,7 @@ ThisBuild / tlCiReleaseBranches := Seq.empty
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
 ThisBuild / githubWorkflowAddedJobs += {
-  val jobSetup = (ThisBuild / githubWorkflowJobSetup).value.toList
+  val jobSetup          = (ThisBuild / githubWorkflowJobSetup).value.toList
   val coverageAggregate =
     WorkflowStep.Sbt(
       List("coverage", "test", "coverageAggregate"),
@@ -77,7 +77,7 @@ lazy val versions = new {
 
   val jsoniter = "2.38.4"
 
-  val log4j = "2.25.1"
+  val log4j = "2.25.2"
 
   val magnoliaScala2 = "1.1.10"
 

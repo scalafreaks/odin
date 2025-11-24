@@ -144,7 +144,7 @@ class Slf4jSpec extends OdinSpec {
 
   it should "not log messages with level lower than set" in {
     forAll { (msgs: List[LoggerMessage], minLevel: Level) =>
-      val expected = msgs.filter(_.level >= minLevel)
+      val expected         = msgs.filter(_.level >= minLevel)
       val (logger, buffer) = {
         val l = LoggerFactory.getLogger(minLevel.show).asInstanceOf[OdinLoggerAdapter[IO]]
         (l, l.underlying.asInstanceOf[BufferingLogger[IO]].buffer)

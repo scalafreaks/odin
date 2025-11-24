@@ -22,7 +22,7 @@ ThisBuild / tlCiReleaseBranches := Seq.empty
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
 ThisBuild / githubWorkflowAddedJobs += {
-  val jobSetup = (ThisBuild / githubWorkflowJobSetup).value.toList
+  val jobSetup          = (ThisBuild / githubWorkflowJobSetup).value.toList
   val coverageAggregate =
     WorkflowStep.Sbt(
       List("coverage", "test", "coverageAggregate"),

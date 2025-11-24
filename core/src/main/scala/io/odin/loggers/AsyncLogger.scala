@@ -48,7 +48,7 @@ private[loggers] final class AsyncLogger[F[_]](
       .map(tail => head.fold(tail)(_ :: tail))
       .flatMap {
         case (headLogger, headMsg) :: Nil => headLogger.log(headMsg)
-        case unbuffered =>
+        case unbuffered                   =>
           val unbufferedGrouped = unbuffered.groupMap { case (logger, _) => logger } { case (_, msg) => msg }
           unbufferedGrouped.toList.traverse_ { case (logger, msgs) => logger.log(msgs) }
       }

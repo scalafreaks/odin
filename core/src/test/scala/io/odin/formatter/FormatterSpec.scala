@@ -106,7 +106,7 @@ class FormatterSpec extends OdinSpec {
     val result = Formatter.formatThrowable(error2, format)
     val lines  = result.split(System.lineSeparator()).toList
 
-    val (cause, trace) = lines.partition(_.startsWith("Caused by"))
+    val (cause, trace)   = lines.partition(_.startsWith("Caused by"))
     val expectedCausedBy = List(
       "Caused by: java.lang.RuntimeException: Exception 2",
       s"Caused by: io.odin.formatter.FormatterSpec$$TestException: Exception 1"
@@ -150,7 +150,7 @@ class FormatterSpec extends OdinSpec {
     forAll { (msg: LoggerMessage) =>
       whenever(msg.context.nonEmpty) {
         val formatted = Formatter.default.format(msg)
-        val lookup = msg.context
+        val lookup    = msg.context
           .map {
             case (key, value) =>
               s"$key: $value"
@@ -199,7 +199,7 @@ class FormatterSpec extends OdinSpec {
 
   it should "ignore theme colors when `colorful=false`" in {
     forAll { (msg: LoggerMessage) =>
-      val theme = Theme.ansi
+      val theme     = Theme.ansi
       val formatted = Formatter
         .create(ThrowableFormat.Default, PositionFormat.Full, theme, colorful = false, printCtx = false)
         .format(msg)

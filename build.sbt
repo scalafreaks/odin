@@ -83,6 +83,8 @@ lazy val versions = new {
 
   val magnoliaScala3 = "1.3.18"
 
+  val otel4s = "0.14.0"
+
   val perfolation = "1.2.12"
 
   val scalaCheck = "1.19.0"
@@ -132,6 +134,10 @@ lazy val perfolation = "com.outr" %% "perfolation" % versions.perfolation
 
 lazy val slf4j  = "org.slf4j" % "slf4j-api" % versions.slf4j
 lazy val slf4j1 = "org.slf4j" % "slf4j-api" % versions.slf4j1
+
+lazy val otel4sLogs    = "org.typelevel" %% "otel4s-core-logs"   % versions.otel4s
+lazy val otel4sSemconv = "org.typelevel" %% "otel4s-semconv"     % versions.otel4s
+lazy val otel4sTestkit = "org.typelevel" %% "otel4s-sdk-testkit" % versions.otel4s % Test
 
 lazy val log4j = ("com.lmax" % "disruptor" % versions.disruptor) :: List(
   "org.apache.logging.log4j" % "log4j-api",
@@ -197,6 +203,17 @@ lazy val `odin-slf4j1-provider` = (project in file("slf4j1-provider"))
   )
   .dependsOn(`odin-core` % "compile->compile;test->test")
 
+lazy val `odin-otel4s-logger` = (project in file("otel4s-logger"))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= otel4sLogs :: otel4sSemconv :: otel4sTestkit :: Nil,
+    buildInfoPackage     := "io.odin.otel4s",
+    buildInfoKeys        := Seq(version),
+    tlVersionIntroduced  := Map("2.13" -> "0.18.0", "3" -> "0.18.0")
+  )
+  .dependsOn(`odin-core` % "compile->compile;test->test")
+
 lazy val `odin-extras` = (project in file("extras"))
   .settings(sharedSettings)
   .settings(
@@ -249,6 +266,7 @@ lazy val odin =
     `odin-slf4j`,
     `odin-slf4j-provider`,
     `odin-slf4j1-provider`,
+    `odin-otel4s-logger`,
     `odin-extras`,
     benchmarks,
     examples

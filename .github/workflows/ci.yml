@@ -75,11 +75,11 @@ jobs:
 
       - name: Make target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: mkdir -p slf4j-provider/target core/target zio/target extras/target json/target slf4j/target slf4j1-provider/target project/target
+        run: mkdir -p slf4j-provider/target core/target zio/target extras/target json/target slf4j/target slf4j1-provider/target otel4s-logger/target project/target
 
       - name: Compress target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: tar cf targets.tar slf4j-provider/target core/target zio/target extras/target json/target slf4j/target slf4j1-provider/target project/target
+        run: tar cf targets.tar slf4j-provider/target core/target zio/target extras/target json/target slf4j/target slf4j1-provider/target otel4s-logger/target project/target
 
       - name: Upload target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))

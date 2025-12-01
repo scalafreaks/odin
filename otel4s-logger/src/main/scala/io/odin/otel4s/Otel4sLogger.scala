@@ -52,12 +52,14 @@ private[otel4s] class Otel4sLogger[F[_], Ctx](
     F: Monad[F]
 ) extends DefaultLogger[F](minLevel) {
 
+  private val loggerName = getClass().getName()
+
   override def withMinimalLevel(level: Level): Logger[F] =
     new Otel4sLogger[F, Ctx](includeFilePath, level, loggerProvider, localCtx)
 
   override def submit(msg: LoggerMessage): F[Unit] =
     for {
-      logger    <- loggerProvider.logger(msg.position.packageName).withVersion(BuildInfo.version).get
+      logger    <- loggerProvider.logger(loggerName).withVersion(BuildInfo.version).get
       ctx       <- localCtx.ask
       severity   = Otel4sLogger.toSeverity(msg.level)
       isEnabled <- logger.meta.isEnabled(ctx, severity, None)

@@ -85,6 +85,8 @@ lazy val versions = new {
 
   val otel4s = "0.15.0"
 
+  val otel4sSdk = "0.16.0"
+
   val perfolation = "1.2.12"
 
   val scalaCheck = "1.19.0"
@@ -137,7 +139,7 @@ lazy val slf4j1 = "org.slf4j" % "slf4j-api" % versions.slf4j1
 
 lazy val otel4sLogs    = "org.typelevel" %% "otel4s-core-logs"   % versions.otel4s
 lazy val otel4sSemconv = "org.typelevel" %% "otel4s-semconv"     % versions.otel4s
-lazy val otel4sTestkit = "org.typelevel" %% "otel4s-sdk-testkit" % versions.otel4s % Test
+lazy val otel4sTestkit = "org.typelevel" %% "otel4s-sdk-testkit" % versions.otel4sSdk % Test
 
 lazy val log4j = ("com.lmax" % "disruptor" % versions.disruptor) :: List(
   "org.apache.logging.log4j" % "log4j-api",

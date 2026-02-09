@@ -83,7 +83,7 @@ lazy val versions = new {
 
   val magnoliaScala3 = "1.3.18"
 
-  val otel4s = "0.15.0"
+  val otel4s = "0.15.1"
 
   val otel4sSdk = "0.16.0"
 

@@ -25,6 +25,7 @@ import io.odin.{LoggerMessage, OdinSpec}
 import io.odin.formatter.Formatter
 
 import cats.effect.{IO, Resource}
+import cats.effect.testkit.TestControl
 import cats.effect.unsafe.IORuntime
 
 class FileLoggerSpec extends OdinSpec {
@@ -69,17 +70,20 @@ class FileLoggerSpec extends OdinSpec {
 
   it should "write in async mode" in {
     forAll { (loggerMessage: List[LoggerMessage], formatter: Formatter) =>
-      (for {
-        path    <- fileResource
-        fileName = path.toString
-        logger  <- asyncFileLogger[IO](fileName, formatter)
-        _       <- Resource.eval(logger.withMinimalLevel(Level.Trace).log(loggerMessage))
-        _       <- Resource.eval(IO.sleep(2.seconds))
-      } yield {
-        new String(Files.readAllBytes(Paths.get(fileName))) shouldBe loggerMessage
-          .map(formatter.format)
-          .mkString(lineSeparator) + (if (loggerMessage.isEmpty) "" else lineSeparator)
-      }).use(IO(_))
+      TestControl
+        .executeEmbed {
+          (for {
+            path    <- fileResource
+            fileName = path.toString
+            logger  <- asyncFileLogger[IO](fileName, formatter)
+            _       <- Resource.eval(logger.withMinimalLevel(Level.Trace).log(loggerMessage))
+            _       <- Resource.eval(IO.sleep(2.seconds))
+          } yield {
+            new String(Files.readAllBytes(Paths.get(fileName))) shouldBe loggerMessage
+              .map(formatter.format)
+              .mkString(lineSeparator) + (if (loggerMessage.isEmpty) "" else lineSeparator)
+          }).use_
+        }
         .unsafeRunSync()
     }
   }

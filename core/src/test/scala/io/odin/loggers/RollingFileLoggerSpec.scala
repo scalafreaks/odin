@@ -28,6 +28,7 @@ import io.odin.formatter.Formatter
 import io.odin.util.ListDirectory
 
 import cats.effect.{IO, Resource}
+import cats.effect.testkit.TestControl
 import cats.effect.unsafe.IORuntime
 
 class RollingFileLoggerSpec extends OdinSpec {
@@ -90,24 +91,27 @@ class RollingFileLoggerSpec extends OdinSpec {
 
     it should "write in async mode" in {
       forAll { (loggerMessage: List[LoggerMessage], formatter: Formatter) =>
-        (for {
-          path      <- fileResource
-          filePrefix = path.toString
-          logger    <- asyncRollingFileLogger[IO](
-                      file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
-                      rolloverInterval = None,
-                      maxFileSizeInBytes = None,
-                      formatter = formatter,
-                      minLevel = Level.Trace
-                    )
-          _ <- Resource.eval(logger.withMinimalLevel(Level.Trace).log(loggerMessage))
-          _ <- Resource.eval(IO.sleep(2.seconds))
-        } yield {
-          val logFile = ListDirectory(path).filter(_.isFile).head.toPath
-          new String(Files.readAllBytes(logFile)) shouldBe loggerMessage
-            .map(formatter.format)
-            .mkString(lineSeparator) + (if (loggerMessage.isEmpty) "" else lineSeparator)
-        }).use(IO(_))
+        TestControl
+          .executeEmbed {
+            (for {
+              path      <- fileResource
+              filePrefix = path.toString
+              logger    <- asyncRollingFileLogger[IO](
+                          file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
+                          rolloverInterval = None,
+                          maxFileSizeInBytes = None,
+                          formatter = formatter,
+                          minLevel = Level.Trace
+                        )
+              _ <- Resource.eval(logger.withMinimalLevel(Level.Trace).log(loggerMessage))
+              _ <- Resource.eval(IO.sleep(2.seconds))
+            } yield {
+              val logFile = ListDirectory(path).filter(_.isFile).head.toPath
+              new String(Files.readAllBytes(logFile)) shouldBe loggerMessage
+                .map(formatter.format)
+                .mkString(lineSeparator) + (if (loggerMessage.isEmpty) "" else lineSeparator)
+            }).use_
+          }
           .unsafeRunSync()
       }
     }
@@ -136,51 +140,57 @@ class RollingFileLoggerSpec extends OdinSpec {
   }
 
   {
-    ignore should "write to the next file once interval is over" in {
+    it should "write to the next file once interval is over" in {
       forAll { (lm1: LoggerMessage, lm2: LoggerMessage, formatter: Formatter) =>
-        (for {
-          path      <- fileResource
-          filePrefix = path.toString
-          logger    <- RollingFileLogger[IO](
-                      file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
-                      maxFileSizeInBytes = None,
-                      rolloverInterval = Some(1.second),
-                      formatter = formatter,
-                      minLevel = Level.Trace
-                    )
-          _ <- Resource.eval(logger.log(lm1))
-          _ <- Resource.eval(IO.sleep(1200.millis))
-          _ <- Resource.eval(logger.log(lm2))
-        } yield {
-          val log1 :: log2 :: Nil = ListDirectory(path).filter(_.isFile).sortBy(_.getName): @unchecked
-          new String(Files.readAllBytes(log1.toPath)) shouldBe formatter.format(lm1) + lineSeparator
-          new String(Files.readAllBytes(log2.toPath)) shouldBe formatter.format(lm2) + lineSeparator
-        }).use(IO(_))
+        TestControl
+          .executeEmbed {
+            (for {
+              path      <- fileResource
+              filePrefix = path.toString
+              logger    <- RollingFileLogger[IO](
+                          file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
+                          maxFileSizeInBytes = None,
+                          rolloverInterval = Some(1.second),
+                          formatter = formatter,
+                          minLevel = Level.Trace
+                        )
+              _ <- Resource.eval(logger.log(lm1))
+              _ <- Resource.eval(IO.sleep(1200.millis))
+              _ <- Resource.eval(logger.log(lm2))
+            } yield {
+              val log1 :: log2 :: Nil = ListDirectory(path).filter(_.isFile).sortBy(_.getName): @unchecked
+              new String(Files.readAllBytes(log1.toPath)) shouldBe formatter.format(lm1) + lineSeparator
+              new String(Files.readAllBytes(log2.toPath)) shouldBe formatter.format(lm2) + lineSeparator
+            }).use_
+          }
           .unsafeRunSync()
       }
     }
 
     it should "write to the next file once log file size is exceeded" in {
       forAll { (lm1: LoggerMessage, lm2: LoggerMessage, formatter: Formatter) =>
-        (for {
-          path      <- fileResource
-          filePrefix = path.toString
-          logger    <- RollingFileLogger[IO](
-                      file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
-                      maxFileSizeInBytes = Some(1),
-                      rolloverInterval = None,
-                      formatter = formatter,
-                      minLevel = Level.Trace
-                    )
-          _ <- Resource.eval(IO.sleep(1.second))
-          _ <- Resource.eval(logger.log(lm1))
-          _ <- Resource.eval(IO.sleep(1.second))
-          _ <- Resource.eval(logger.log(lm2))
-        } yield {
-          val log1 :: log2 :: _ = ListDirectory(path).filter(_.isFile).sortBy(_.getName): @unchecked
-          new String(Files.readAllBytes(log1.toPath)) shouldBe formatter.format(lm1) + lineSeparator
-          new String(Files.readAllBytes(log2.toPath)) shouldBe formatter.format(lm2) + lineSeparator
-        }).use(IO(_))
+        TestControl
+          .executeEmbed {
+            (for {
+              path      <- fileResource
+              filePrefix = path.toString
+              logger    <- RollingFileLogger[IO](
+                          file"$filePrefix/log-$year-$month-$day-$hour-$minute-$second.log",
+                          maxFileSizeInBytes = Some(1),
+                          rolloverInterval = None,
+                          formatter = formatter,
+                          minLevel = Level.Trace
+                        )
+              _ <- Resource.eval(IO.sleep(1.second))
+              _ <- Resource.eval(logger.log(lm1))
+              _ <- Resource.eval(IO.sleep(1.second))
+              _ <- Resource.eval(logger.log(lm2))
+            } yield {
+              val log1 :: log2 :: _ = ListDirectory(path).filter(_.isFile).sortBy(_.getName): @unchecked
+              new String(Files.readAllBytes(log1.toPath)) shouldBe formatter.format(lm1) + lineSeparator
+              new String(Files.readAllBytes(log2.toPath)) shouldBe formatter.format(lm2) + lineSeparator
+            }).use_
+          }
           .unsafeRunSync()
       }
     }

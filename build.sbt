@@ -1,4 +1,4 @@
-ThisBuild / tlBaseVersion := "0.18"
+ThisBuild / tlBaseVersion := "0.19"
 
 ThisBuild / organization     := "dev.scalafreaks"
 ThisBuild / organizationName := "ScalaFreaks"
@@ -69,7 +69,7 @@ lazy val versions = new {
 
   val cats = "2.13.0"
 
-  val catsEffect = "3.6.3"
+  val catsEffect = "3.7.0"
 
   val catsMtl = "1.6.0"
 

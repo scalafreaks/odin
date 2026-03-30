@@ -91,7 +91,7 @@ lazy val versions = new {
 
   val scalaCheck = "1.19.0"
 
-  val scalaTest = "3.2.19"
+  val scalaTest = "3.2.20"
 
   val scalaTestScalaCheck = "3.2.14.0"
 

@@ -95,7 +95,7 @@ lazy val versions = new {
 
   val scalaTestScalaCheck = "3.2.14.0"
 
-  val scribe = "3.18.0"
+  val scribe = "3.19.0"
 
   val slf4j = "2.0.16"
 

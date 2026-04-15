@@ -77,25 +77,25 @@ lazy val versions = new {
 
   val jsoniter = "2.38.9"
 
-  val log4j = "2.25.3"
+  val log4j = "2.25.4"
 
-  val magnoliaScala2 = "1.1.12"
+  val magnoliaScala2 = "1.1.13"
 
   val magnoliaScala3 = "1.3.18"
 
-  val otel4s = "0.15.2"
+  val otel4s = "0.16.0"
 
-  val otel4sSdk = "0.17.0"
+  val otel4sSdk = "0.18.0"
 
   val perfolation = "1.3.0"
 
   val scalaCheck = "1.19.0"
 
-  val scalaTest = "3.2.19"
+  val scalaTest = "3.2.20"
 
   val scalaTestScalaCheck = "3.2.14.0"
 
-  val scribe = "3.18.0"
+  val scribe = "3.19.0"
 
   val slf4j = "2.0.16"
 

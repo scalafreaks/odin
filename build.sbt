@@ -10,7 +10,7 @@ ThisBuild / tlFatalWarnings := true
 ThisBuild / tlJdkRelease    := Some(11)
 
 val Scala2 = "2.13.18"
-val Scala3 = "3.3.7"
+val Scala3 = "3.3.8"
 
 ThisBuild / scalaVersion       := Scala2
 ThisBuild / crossScalaVersions := Seq(Scala2, Scala3)

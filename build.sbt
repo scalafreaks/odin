@@ -79,7 +79,7 @@ lazy val versions = new {
 
   val log4j = "2.26.0"
 
-  val magnoliaScala2 = "1.1.13"
+  val magnoliaScala2 = "1.1.14"
 
   val magnoliaScala3 = "1.3.20"
 

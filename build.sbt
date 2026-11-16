@@ -87,7 +87,7 @@ lazy val versions = new {
 
   val otel4sSdk = "0.19.0"
 
-  val perfolation = "1.3.0"
+  val perfolation = "1.3.1"
 
   val scalaCheck = "1.19.0"
 
